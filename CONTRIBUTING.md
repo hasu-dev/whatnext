@@ -35,6 +35,8 @@ when a PR is merged.
    | `tags` | Optional, max 8, lowercase-hyphen slugs from [`data/tags.json`](data/tags.json) | `["nlp", "llm"]` |
    | `deadline` | Paper submission deadline, `YYYY-MM-DD` | `2026-12-15` |
    | `abstractDeadline` | Optional earlier abstract deadline | `2026-12-08` |
+   | `deadlineNote` | Optional qualifier shown under the deadline | `Cycle 1` |
+   | `nextCycleExpected` | Optional `YYYY-MM` of an announced next cycle whose date isn't published — renders the entry as TBA instead of CLOSED | `2027-02` |
    | `tz` | Optional timezone; omit for AoE | `AoE` |
    | `location` | `City, Country` | `Vancouver, Canada` |
    | `website` | Official site, `https://` only | `https://naacl.org` |
@@ -47,12 +49,19 @@ when a PR is merged.
    tag? Propose it in a separate PR that only touches `tags.json`.
 
    Do **not** add status or days-remaining fields; both are derived from
-   `deadline` at render time. For past editions, set `"archived": true`
-   instead of deleting the file — archived entries leave the live treemap.
+   `deadline` (and `nextCycleExpected`) at render time. For past editions,
+   set `"archived": true` instead of deleting the file — archived entries
+   leave the live treemap.
 
-   **Weight guide:** top-tier flagship venues (NeurIPS, CVPR, ICML) 18–22 ·
-   major venues (ACL, CHI, KDD) 10–16 · strong specialized venues 5–9 ·
-   niche/regional 1–4. When unsure, compare with neighbors in the same field.
+   **`nextCycleExpected`** is only for cycles/editions the organizers have
+   *officially announced* without a date. Never guess a month; once the
+   date is published, replace `deadline` and remove this field.
+
+   **Weight guide:** weight is only the *initial* tile size — live attention
+   signals take over once the entry is in use. The in-app Add conf form maps
+   tiers to Flagship 20 · Major 12 · Specialized 7 · Niche 3; hand-written
+   entries can use anything 1–25 (flagship 18–22, major 10–16, specialized
+   5–9, niche 1–4). When unsure, compare with neighbors in the same field.
 
    **Featured:** keep `featured: true` rare (~1 in 4 entries). It is meant for
    venues a whole field plans its year around. Maintainers may adjust it.
@@ -68,10 +77,16 @@ when a PR is merged.
 
 ## Updating an existing conference
 
-Same process — edit the file in place. Typical updates:
+Each edition is its own file, so the update depends on what changed:
 
-- New edition announced → bump `year`, `deadline`, `location`, `website`.
-- Deadline extended → update `deadline` and link the announcement in the PR.
+- **Deadline extended / corrected** → edit the edition's file in place,
+  update `updatedAt`, and link the announcement in the PR.
+- **Next submission cycle gets a date** (multi-cycle venues) → replace
+  `deadline`/`abstractDeadline` with the new cycle's dates, adjust
+  `deadlineNote`, remove `nextCycleExpected`.
+- **New edition announced** → add a new `<confname>-<newyear>.json` file
+  and set `"archived": true` on the previous edition so the live map stays
+  lean. Don't edit the year in place.
 
 ## Review criteria
 

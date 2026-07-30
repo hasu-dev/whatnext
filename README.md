@@ -1,89 +1,61 @@
-# WHATNEXT — Conference Deadline Heatmap
+# what-next.app
 
-A full-screen, treemap-style heatmap of research conference deadlines.
-Tile area = attention; click a tile and it expands in place to show
-details. Two complete themes share one component tree, switched purely via
-design tokens:
+*conference heat map*
 
-- **Archive Blue** — warm paper background, cobalt accents, editorial serif.
-- **Monochrome** — black/white brutalist, bold sans, hairline status tags.
+**Which deadline should you care about next?** what-next.app lays
+research conference deadlines out as a full-screen treemap. Urgent
+deadlines are solid, approaching ones hatched, closed ones struck
+through — one glance tells you where the field's clock is ticking.
+Tile sizes start from editorial prominence; as more people use the map,
+we hope they'll grow to reflect where the community's attention
+actually is.
 
-## Stack
+Built by [hasu.ai](https://hasu.ai). Data is community-maintained on
+GitHub — fixing a deadline is one click, adding a conference is one PR.
 
-- React + TypeScript + Vite
-- `d3-hierarchy` computes treemap rects; React renders them
-- `framer-motion` animates tiles between layouts (selection re-weighting)
-- CSS variables / design tokens for theming (`src/styles/tokens.css`)
-- Cloudflare Pages (+ Functions) · one cron Worker · D1 · KV
+## Using the map
 
-## Architecture: cold / hot separation
+- **Click a tile** — it expands in place with the full name, venue,
+  abstract/paper deadlines, tags, and actions:
+  - **ICS** — download a calendar file with a 7-day reminder
+  - **Share** — copy a link with a proper social preview card
+  - **Report** — prefilled GitHub issue for wrong/extended deadlines
+- **Search** (`/` to focus) understands a little syntax: plain text
+  fuzzy-matches names and tags, `#llm` matches a tag exactly,
+  `field:vision` restricts a facet, `-workshop` or `NOT x` excludes,
+  `a OR b` alternates (space means AND).
+- **Filter chips** — fields on the left, your **Starred** set and
+  **Add conf** on the right. Stars live in your browser only.
+- **Timeline** (bottom) — click Week / Month / Quarter / Year to keep
+  only deadlines within that horizon; the numbers between anchors count
+  deadlines per interval.
+- **Keyboard** — `⌘K` zen mode (map only), `H` help pane, `Esc` closes
+  things.
+- **Statuses** — `URGENT` ≤ 3 weeks · `APPROACHING` ≤ 90 days · `FAR` ·
+  `CLOSED` · `TBA` (a next cycle is announced but not yet dated).
+- **Two themes** — Archive Blue and Monochrome, one click apart.
 
-**Cold data (conferences) lives in the repo** — one JSON file per venue in
-`data/conferences/`, validated by `data/schema.json` + `data/tags.json`.
-The build bundles it into the SPA and into `data/index.json` for the edge.
-The read path is static files only; the client never queries D1 at render
-time.
+## Contributing data
 
-**Hot data (behavior signals) is sparse writes.** Five metrics only —
-`view`, `open`, `favorite`, `ics`, `share` — posted fire-and-forget to
-`/api/event` (Pages Function → D1 UPSERT on `(conf_id, day, metric)`).
-No cookies, no user ids, no PII; favorite state itself stays in
-localStorage. Zero-result search queries land in `search_miss` as the
-coverage backlog. Put a Cloudflare WAF rate-limit rule on `/api/event`.
+Every conference is one JSON file in
+[`data/conferences/`](data/conferences/) named `<confname>-<year>.json`.
+The fastest paths start inside the app:
 
-**Aggregation closes the loop.** A cron Worker (every 3h) reads the last
-28 days, computes in JS: `decayed` (intent-weighted `ics > share >
-favorite > open > view`, log-compressed, 7-day half-life) and `velocity`
-(last 7d vs previous 7d), writes the snapshot to KV, and the edge serves
-it as `/attention.json`. The frontend blends it into tile area — the
-editorial `weight` is only a cold-start prior — and marks field-normalized
-velocity outliers as trending, so small venues can surface and the map
-never degrades into a popularity chart.
+- **Wrong or extended deadline?** Open the detail panel → **Report**.
+- **Missing conference?** **Add conf** in the filter row builds the JSON
+  and takes you to GitHub's prefilled new-file page — you open the PR.
 
-**Sharing:** `/s/{id}` is a Pages Function that injects `og:*` meta into
-the SPA shell at the edge (crawlers don't run JS) and counts one `view`.
-OG images are generated at build time (`satori` → `public/og/*.png`) from
-the same design tokens as the tiles; a daily rebuild workflow keeps the
-"days left" number fresh.
+CI validates every data PR against [`data/schema.json`](data/schema.json)
+and the tag vocabulary in [`data/tags.json`](data/tags.json). See
+**[CONTRIBUTING.md](CONTRIBUTING.md)** for the field reference and review
+criteria. No account, token, or local setup is required beyond GitHub
+itself.
 
-## Develop
+## Developers
 
-```bash
-npm install
-npm run dev
-```
+Stack, architecture, and Cloudflare deployment live in
+**[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)**.
 
-`npm run build` also validates the dataset, regenerates `data/index.json`,
-and renders OG images (skipped gracefully when offline).
+## License
 
-## Conference data is community-maintained
-
-- **Fix / extend a deadline:** every detail panel has a REPORT button that
-  opens a prefilled GitHub issue.
-- **Add a conference:** the ADD CONF button in the app collects the fields
-  and jumps to GitHub's prefilled new-file page — you open the PR yourself.
-  No server-side proxy ever holds a token.
-- CI rejects entries that fail the schema, whose `id` ≠ filename, or whose
-  tags are outside `data/tags.json`. See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
-
-## Deploy (Cloudflare)
-
-```bash
-# One-time setup
-wrangler d1 create whatnext                 # id → worker/wrangler.toml
-wrangler d1 execute whatnext --file=worker/schema.sql --remote
-wrangler kv namespace create whatnext-cache # id → worker/wrangler.toml
-
-# Cron aggregator
-cd worker
-wrangler secret put ADMIN_TOKEN   # guards /aggregate and /search-misses
-wrangler deploy
-
-# Site → Cloudflare Pages (build command: npm run build, output: dist)
-# In the Pages project settings, bind:
-#   D1  "DB"    → whatnext        (for /api/event and /s/{id} view counts)
-#   KV  "CACHE" → whatnext-cache  (for /attention.json)
-# Add a WAF rate-limiting rule on /api/event (e.g. 30 req / 10s / IP).
-# Create a deploy hook and store it as the CLOUDFLARE_PAGES_DEPLOY_HOOK
-# GitHub secret so the daily-rebuild workflow can refresh OG countdowns.
-```
+[MIT](LICENSE) © 2026 [hasu.ai](https://hasu.ai)
