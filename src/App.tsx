@@ -15,10 +15,27 @@ import { reportEvent, reportSearchMiss } from './lib/events'
 const CONFERENCES = loadConferences()
 const FIELDS = [...new Set(CONFERENCES.map((c) => c.field))].sort()
 
-function usePersistedSet(key: string): [Set<string>, (id: string) => void] {
+function usePersistedSet(key: string, validValues: string[]): [Set<string>, (id: string) => void] {
   const [set, setSet] = useState<Set<string>>(() => {
     try {
-      return new Set(JSON.parse(localStorage.getItem(key) ?? '[]') as string[])
+      const raw = JSON.parse(localStorage.getItem(key) ?? '[]') as string[]
+      const valid = new Set(validValues)
+      const next = new Set<string>()
+      for (const v of raw) {
+        if (valid.has(v)) {
+          next.add(v)
+        } else {
+          // legacy conference ids predate the -year suffix; migrate them
+          // when they map unambiguously onto a current entry, otherwise
+          // drop them so counts never disagree with the dataset
+          const matches = validValues.filter((x) => x.startsWith(`${v}-`))
+          if (matches.length === 1) next.add(matches[0])
+        }
+      }
+      if (next.size !== raw.length || raw.some((v) => !next.has(v))) {
+        localStorage.setItem(key, JSON.stringify([...next]))
+      }
+      return next
     } catch {
       return new Set()
     }
@@ -39,8 +56,11 @@ export default function App() {
     () => (localStorage.getItem('theme') as ThemeName) ?? 'archive',
   )
   const [query, setQuery] = useState('')
-  const [activeFields, toggleField] = usePersistedSet('fields')
-  const [favorites, toggleFave] = usePersistedSet('favorites')
+  const [activeFields, toggleField] = usePersistedSet('fields', FIELDS)
+  const [favorites, toggleFave] = usePersistedSet(
+    'favorites',
+    CONFERENCES.map((c) => c.id),
+  )
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [horizon, setHorizon] = useState<number | null>(null)
   const [zen, setZen] = useState(false)
