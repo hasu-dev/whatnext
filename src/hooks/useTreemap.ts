@@ -29,9 +29,9 @@ export function estimateDetailHeight(conf: Conference): number {
   px += 39 // deadline
   if (conf.website) px += 39
   const tagCount = conf.tags?.length ?? 0
-  if (tagCount > 0) px += 20 + Math.ceil(tagCount / 3) * 33
-  px += 20 + 33 // actions row
-  px += 24 // freshness
+  if (tagCount > 0) px += 20 + Math.ceil(tagCount / 3) * 24 // text-style tag rows
+  px += 24 + 16 + 34 // actions row incl. rule + air above it
+  px += 16 + 14 // freshness
   return Math.round(px * 1.08) // small safety margin
 }
 

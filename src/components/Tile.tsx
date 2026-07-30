@@ -38,6 +38,9 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   const small = area < 45_000
   const large = area > 120_000
   const narrow = w < 150
+  // squashed-flat tiles (a boosted neighbor's leftover strip) switch to a
+  // single centered row instead of a cramped column
+  const flat = h < 84
 
   const padX = narrow ? 9 : 14
   const avail = w - padX * 2
@@ -90,13 +93,38 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
       initial={false}
       animate={{ left: x, top: y, width: w, height: h }}
       transition={SPRING}
-      style={{ padding: narrow ? `9px ${padX}px` : `12px ${padX}px` }}
+      style={{
+        padding: flat ? `0 ${padX}px` : narrow ? `9px ${padX}px` : `12px ${padX}px`,
+        flexDirection: flat ? 'row' : 'column',
+        alignItems: flat ? 'center' : 'stretch',
+        gap: flat ? 12 : 0,
+      }}
       onClick={onSelect}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
       aria-label={`${conf.name} ${conf.year}, deadline ${conf.deadline}`}
     >
+      {flat ? (
+        <>
+          <div
+            className="tile__name"
+            style={{ fontSize: Math.max(11, Math.min(h * 0.42, fittedName, 20)) }}
+          >
+            {conf.name}
+            {showSup && <sup>({String(conf.year).slice(-2)})</sup>}
+          </div>
+          <div className="tile__meta" style={{ fontSize: 9, marginLeft: 'auto' }}>
+            <span>{conf.deadline}</span>
+          </div>
+          {w > 230 && (
+            <div className="tile__countdown" style={{ fontSize: Math.min(h * 0.4, 15) }}>
+              {countdown}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
       <div className="tile__row">
         {showField ? <span className="tile__field">{conf.field}</span> : <span />}
         <span className="tile__row" style={{ gap: 6 }}>
@@ -264,6 +292,8 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
           </motion.div>
         )}
       </AnimatePresence>
+        </>
+      )}
     </motion.div>
   )
 }
