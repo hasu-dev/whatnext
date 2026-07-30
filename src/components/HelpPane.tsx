@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { TrendingUp, X } from 'lucide-react'
 
 interface Props {
   onClose: () => void
@@ -7,7 +7,7 @@ interface Props {
 const SHORTCUTS: Array<[string, string]> = [
   ['/', 'Focus the search box'],
   ['⌘K / Ctrl+K', 'Zen mode — hide everything but the map'],
-  ['⌘H / Ctrl+H or ?', 'Toggle this help pane'],
+  ['?', 'Toggle this help pane'],
   ['Esc', 'Close panels, deselect, exit zen'],
   ['Enter on a tile', 'Expand it in place'],
 ]
@@ -53,9 +53,31 @@ export function HelpPane({ onClose }: Props) {
           </section>
         </div>
 
+        <div className="help__legend" aria-label="Tile status legend">
+          <div className="help__key">
+            <span className="help__swatch is-urgent" />
+            Urgent
+          </div>
+          <div className="help__key">
+            <span className="help__swatch is-approaching" />
+            Approaching
+          </div>
+          <div className="help__key">
+            <span className="help__swatch is-far" />
+            Far
+          </div>
+          <div className="help__key">
+            <span className="help__swatch is-closed" />
+            <s>Closed</s>
+          </div>
+          <div className="help__key">
+            <TrendingUp size={13} strokeWidth={2} />
+            Trending in its field
+          </div>
+        </div>
+
         <p className="help__foot">
-          Tile area reflects attention; urgent deadlines are solid, approaching ones hatched,
-          closed ones struck through. Click the timeline ranges to filter by horizon. Data is
+          Tile area reflects attention. Click the timeline ranges to filter by horizon. Data is
           community-maintained — use Report / Add conf to contribute via GitHub.
         </p>
       </div>

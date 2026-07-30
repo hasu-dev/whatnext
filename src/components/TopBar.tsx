@@ -39,7 +39,7 @@ export const TopBar = forwardRef<HTMLInputElement, Props>(function TopBar(
       </label>
 
       <div className="topbar__right">
-        <span className="topbar__hint">⌘K zen · ⌘H help</span>
+        <span className="topbar__hint">⌘K zen · ? help</span>
         <div className="theme-toggle" role="group" aria-label="Theme">
           <button
             className={theme === 'archive' ? 'is-active' : ''}

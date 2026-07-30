@@ -8,6 +8,17 @@ interface Props {
   onClose: () => void
 }
 
+// Contributors pick a tier, not a magic number. The mapped weight is only
+// the cold-start prior for tile size — once the entry is live, aggregated
+// attention signals take over and drive the area; maintainers can still
+// tune the number in review.
+const TIERS = [
+  { label: 'Flagship', weight: 20, hint: 'the venue a whole field plans around' },
+  { label: 'Major', weight: 12, hint: 'top venue in its area' },
+  { label: 'Specialized', weight: 7, hint: 'strong focused venue' },
+  { label: 'Niche', weight: 3, hint: 'workshop / regional' },
+]
+
 // Collects the fields, assembles a valid JSON entry, and jumps to GitHub's
 // prefilled new-file page so the contributor opens the PR themselves.
 // No token, no proxy — the user's own GitHub session does the work.
@@ -20,8 +31,8 @@ export function AddConference({ fields, onClose }: Props) {
     deadline: '',
     location: '',
     website: '',
-    weight: 6,
   })
+  const [tier, setTier] = useState(2) // default: Specialized
   const [tags, setTags] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
@@ -55,7 +66,7 @@ export function AddConference({ fields, onClose }: Props) {
       deadline: form.deadline,
       location: form.location,
       ...(form.website ? { website: form.website } : {}),
-      weight: Number(form.weight),
+      weight: TIERS[tier].weight,
       featured: false,
       updatedAt: new Date().toISOString().slice(0, 10),
     }
@@ -108,10 +119,6 @@ export function AddConference({ fields, onClose }: Props) {
             <input value={form.deadline} onChange={(e) => set('deadline', e.target.value)} placeholder="2026-12-15" />
           </label>
           <label>
-            WEIGHT (1-25)
-            <input type="number" min={1} max={25} value={form.weight} onChange={(e) => set('weight', e.target.value)} />
-          </label>
-          <label>
             LOCATION
             <input value={form.location} onChange={(e) => set('location', e.target.value)} placeholder="City, Country" />
           </label>
@@ -119,6 +126,22 @@ export function AddConference({ fields, onClose }: Props) {
             WEBSITE
             <input value={form.website} onChange={(e) => set('website', e.target.value)} placeholder="https://…" />
           </label>
+        </div>
+
+        <div className="modal__tags">
+          <span className="modal__label">PROMINENCE — INITIAL TILE SIZE ONLY; LIVE ATTENTION TAKES OVER</span>
+          <div>
+            {TIERS.map((t, i) => (
+              <button
+                key={t.label}
+                className={`chip ${tier === i ? 'is-active' : ''}`}
+                onClick={() => setTier(i)}
+                title={t.hint}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="modal__tags">

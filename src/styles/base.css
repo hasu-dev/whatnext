@@ -663,10 +663,55 @@ button {
   line-height: 1.5;
 }
 
-.help__foot {
-  margin-top: 18px;
-  padding-top: 14px;
+/* tile-status legend: the swatches are miniature tiles, driven by the
+   same tokens the real tiles use */
+.help__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  margin-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
+}
+
+.help__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-meta);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+.help__swatch {
+  width: 30px;
+  height: 19px;
+  border: 1px solid var(--line);
+  background: var(--tile-bg);
+  flex-shrink: 0;
+}
+
+.help__swatch.is-urgent {
+  background: var(--tile-urgent-bg);
+  border-color: var(--tile-urgent-bg);
+}
+
+.help__swatch.is-approaching {
+  background: var(--tile-approaching-bg);
+}
+
+.help__swatch.is-closed {
+  border-color: var(--tile-closed-line);
+}
+
+.help__key s {
+  color: var(--tile-closed-ink);
+}
+
+.help__foot {
+  margin-top: 14px;
   font-family: var(--font-meta);
   font-size: 10px;
   line-height: 1.7;
