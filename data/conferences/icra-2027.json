@@ -1,0 +1,21 @@
+{
+  "id": "icra-2027",
+  "name": "ICRA",
+  "fullName": "IEEE International Conference on Robotics and Automation",
+  "year": 2027,
+  "field": "AI/ML",
+  "tags": [
+    "ai",
+    "computer-vision",
+    "machine-learning",
+    "reinforcement-learning",
+    "robotics"
+  ],
+  "deadline": "2026-09-16T07:59:59",
+  "tz": "UTC+1",
+  "location": "Seoul, Republic of Korea",
+  "website": "https://2027.ieee-icra.org/",
+  "weight": 20,
+  "featured": false,
+  "updatedAt": "2026-07-30"
+}
