@@ -1,0 +1,17 @@
+# Cloudflare Pages configuration (the site + functions/).
+# The cron aggregator worker has its own config in worker/wrangler.toml.
+name = "whatnext"
+compatibility_date = "2026-07-01"
+pages_build_output_dir = "dist"
+
+# Bindings for Pages Functions (/api/event, /s/[id], /attention.json).
+# Declared here so `wrangler pages deploy` applies them — no dashboard
+# clicking required. Same D1/KV as the aggregator worker.
+[[d1_databases]]
+binding = "DB"
+database_name = "whatnext"
+database_id = "e96abdac-21b0-42b2-ac7b-3ab72890f755"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "2af38fce91944d03982ccd3ce22d839c"

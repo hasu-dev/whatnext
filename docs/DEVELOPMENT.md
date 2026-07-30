@@ -37,22 +37,32 @@ refreshed by a daily rebuild workflow.
 
 ## Deploy (Cloudflare)
 
+The site is a **direct-upload Pages project** (`whatnext`): the root
+`wrangler.toml` declares the output directory and the D1/KV bindings for
+the Pages Functions, so `wrangler pages deploy` needs no dashboard
+configuration. The GitHub `Deploy` workflow runs it on every push to
+main and once a day (to refresh OG countdowns); it needs two repository
+secrets: `CLOUDFLARE_API_TOKEN` (Cloudflare Pages: Edit) and
+`CLOUDFLARE_ACCOUNT_ID`.
+
 ```bash
 # One-time setup
-wrangler d1 create whatnext                 # id → worker/wrangler.toml
+wrangler d1 create whatnext                 # ids → wrangler.toml (root + worker/)
 wrangler d1 execute whatnext --file=worker/schema.sql --remote
-wrangler kv namespace create whatnext-cache # id → worker/wrangler.toml
+wrangler kv namespace create whatnext_cache
 
-# Cron aggregator
+# Cron aggregator (worker/wrangler.toml)
 cd worker
 wrangler secret put ADMIN_TOKEN   # guards /aggregate and /search-misses
 wrangler deploy
+cd ..
 
-# Site → Cloudflare Pages (build command: npm run build, output: dist)
-# In the Pages project settings, bind:
-#   D1  "DB"    → whatnext        (for /api/event and /s/{id} view counts)
-#   KV  "CACHE" → whatnext-cache  (for /attention.json)
-# Add a WAF rate-limiting rule on /api/event (e.g. 30 req / 10s / IP).
-# Create a deploy hook and store it as the CLOUDFLARE_PAGES_DEPLOY_HOOK
-# GitHub secret so the daily-rebuild workflow can refresh OG countdowns.
+# Site: create once, then deploy (CI does this on every push)
+wrangler pages project create whatnext --production-branch=main
+npm run build
+wrangler pages deploy dist
 ```
+
+Remaining dashboard-only steps: attach the custom domain to the Pages
+project, and add a WAF rate-limiting rule on `/api/event`
+(e.g. 30 req / 10s / IP, action Block, default duration).
