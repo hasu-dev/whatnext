@@ -59,6 +59,16 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   const nameSize = Math.max(9, Math.min(fittedName, h * 0.38, large ? 56 : 34))
   const showSup = fittedName >= 9
 
+  // the expanded detail renders progressively: estimate the vertical room
+  // left under the name and drop low-priority rows before anything clips.
+  // Core rows (venue, deadline, website, actions) always fit or the tile
+  // simply doesn't enter the detail state.
+  const detailBudget = h - 24 - 26 - nameSize * 1.1
+  const showDetail = selected && large && detailBudget >= 210
+  const showDetailTags = detailBudget >= 280 && (conf.tags?.length ?? 0) > 0
+  const showDetailFullName = detailBudget >= 340
+  const showDetailFreshness = detailBudget >= 380
+
   // bottom row: date is fixed, the countdown shrinks into the leftover
   // width and disappears entirely rather than clipping
   const metaSize = w < 100 ? 8 : narrow ? 9 : 11
@@ -124,7 +134,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
         </span>
       </div>
 
-      <div style={{ minHeight: 0, overflow: 'hidden', flexGrow: selected && large ? 1 : 0 }}>
+      <div style={{ minHeight: 0, overflow: 'hidden', flexGrow: showDetail ? 1 : 0 }}>
         {/* font-size transitions via CSS (see base.css) so text scales
             with the box instead of snapping to its final size */}
         <div className="tile__name" style={{ fontSize: nameSize }}>
@@ -132,15 +142,19 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
           {showSup && <sup>({String(conf.year).slice(-2)})</sup>}
         </div>
 
-        {selected && large && (
+        {showDetail && (
           <motion.dl
             className="tile__detail"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.16, duration: 0.28, ease: 'easeOut' }}
           >
-            <dt>Full name</dt>
-            <dd>{conf.fullName}</dd>
+            {showDetailFullName && (
+              <>
+                <dt>Full name</dt>
+                <dd>{conf.fullName}</dd>
+              </>
+            )}
             <dt>Venue</dt>
             <dd>
               {conf.location} — {conf.year}
@@ -170,7 +184,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
                 </dd>
               </>
             )}
-            {conf.tags && conf.tags.length > 0 && (
+            {showDetailTags && conf.tags && (
               <>
                 <dt>Tags</dt>
                 <dd className="tile__tags">
@@ -220,7 +234,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
                 <Flag size={11} strokeWidth={1.75} /> REPORT
               </a>
             </dd>
-            <dd className="tile__freshness">DATA VERIFIED {conf.updatedAt}</dd>
+            {showDetailFreshness && <dd className="tile__freshness">DATA VERIFIED {conf.updatedAt}</dd>}
           </motion.dl>
         )}
       </div>
@@ -229,7 +243,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
           yields its space to it while expanded (crossfading with the
           detail's entrance) */}
       <AnimatePresence initial={false}>
-        {!(selected && large) && (
+        {!showDetail && (
           <motion.div
             className="tile__row"
             style={{ alignItems: 'flex-end' }}
