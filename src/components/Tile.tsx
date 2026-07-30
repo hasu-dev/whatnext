@@ -48,9 +48,13 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   const small = area < 45_000
   const large = area > 120_000
   const narrow = w < 150
-  // squashed-flat tiles (a boosted neighbor's leftover strip) switch to a
-  // single centered row instead of a cramped column
-  const flat = h < 84
+  // vertical room left for the name once padding, the header row, and the
+  // bottom row have taken theirs — the column layout must never let the
+  // name clip against its neighbors
+  const nameVBudget = h - 24 - (tiny ? 12 : 26) - 30
+  // squashed-flat tiles (short strips) switch to a single centered row
+  // instead of a cramped column
+  const flat = h < 84 || nameVBudget < 14
 
   const padX = narrow ? 9 : 14
   const avail = w - padX * 2
@@ -69,18 +73,33 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   // Below the 9px floor the name can no longer shrink to fit — drop the
   // superscript and let CSS ellipsize instead of clipping.
   const fittedName = (avail * 1.22) / (conf.name.length + 2.2)
-  const nameSize = Math.max(9, Math.min(fittedName, h * 0.38, large ? 56 : 34))
+  const nameSize = Math.max(
+    9,
+    Math.min(fittedName, h * 0.38, large ? 56 : 34, flat ? Infinity : nameVBudget),
+  )
   const showSup = fittedName >= 9
 
   // the expanded detail renders progressively: estimate the vertical room
   // left under the name and drop low-priority rows before anything clips.
-  // Core rows (venue, deadline, website, actions) always fit or the tile
-  // simply doesn't enter the detail state.
+  // Requirements are computed from THIS conference's actual rows (abstract
+  // deadline, notes, tag count, name length), cumulatively by priority:
+  // core (venue/deadline/website/actions) → tags → full name → freshness.
   const detailBudget = h - 24 - 26 - nameSize * 1.1
-  const showDetail = selected && large && detailBudget >= 210
-  const showDetailTags = detailBudget >= 280 && (conf.tags?.length ?? 0) > 0
-  const showDetailFullName = detailBudget >= 340
-  const showDetailFreshness = detailBudget >= 380
+  const tagCount = conf.tags?.length ?? 0
+  const coreNeed =
+    39 + // venue
+    (conf.abstractDeadline ? 39 : 0) +
+    57 + // deadline incl. local-time line
+    (conf.deadlineNote ? 18 : 0) +
+    (conf.nextCycleExpected ? 18 : 0) +
+    (conf.website ? 39 : 0) +
+    84 // actions row incl. rule + margins
+  const tagsNeed = tagCount > 0 ? 20 + Math.ceil(tagCount / 3) * 26 : 0
+  const fullNameNeed = 20 + Math.ceil(conf.fullName.length / 38) * 19
+  const showDetail = selected && large && detailBudget >= coreNeed
+  const showDetailTags = tagCount > 0 && detailBudget >= coreNeed + tagsNeed
+  const showDetailFullName = detailBudget >= coreNeed + tagsNeed + fullNameNeed
+  const showDetailFreshness = detailBudget >= coreNeed + tagsNeed + fullNameNeed + 30
 
   // bottom row: date is fixed, the countdown shrinks into the leftover
   // width and disappears entirely rather than clipping
