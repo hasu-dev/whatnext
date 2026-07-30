@@ -9,11 +9,11 @@ crons = ["0 */3 * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "whatnext"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "e96abdac-21b0-42b2-ac7b-3ab72890f755"
 
 [[kv_namespaces]]
 binding = "CACHE"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "2af38fce91944d03982ccd3ce22d839c"
 
 # Maintainer endpoints (/aggregate, /search-misses) require a bearer
 # token; create it with: wrangler secret put ADMIN_TOKEN
