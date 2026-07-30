@@ -71,6 +71,10 @@ export function HelpPane({ onClose }: Props) {
             <s>Closed</s>
           </div>
           <div className="help__key">
+            <span className="help__tag">(TBA)</span>
+            Next cycle date pending
+          </div>
+          <div className="help__key">
             <TrendingUp size={13} strokeWidth={2} />
             Trending in its field
           </div>

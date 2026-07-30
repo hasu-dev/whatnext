@@ -1,4 +1,4 @@
-export type Status = 'URGENT' | 'APPROACHING' | 'FAR' | 'CLOSED'
+export type Status = 'URGENT' | 'APPROACHING' | 'FAR' | 'CLOSED' | 'TBA'
 
 export interface Conference {
   id: string
@@ -9,6 +9,8 @@ export interface Conference {
   tags?: string[] // controlled vocabulary slugs, see data/tags.json
   deadline: string // ISO date of paper submission deadline
   abstractDeadline?: string
+  deadlineNote?: string // e.g. which submission cycle the deadline refers to
+  nextCycleExpected?: string // YYYY-MM of an announced-but-undated next cycle
   tz?: string // defaults to AoE
   location: string
   website?: string

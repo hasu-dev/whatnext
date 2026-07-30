@@ -47,14 +47,27 @@ async function loadFonts() {
   return fonts
 }
 
-function statusOf(days) {
-  if (days < 0) return 'CLOSED'
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function statusOf(days, nextCycleExpected) {
+  if (days < 0) {
+    if (nextCycleExpected && nextCycleExpected >= new Date().toISOString().slice(0, 7)) return 'TBA'
+    return 'CLOSED'
+  }
   if (days <= 21) return 'URGENT'
   if (days <= 90) return 'APPROACHING'
   return 'FAR'
 }
 
-function tileMarkup(conf, days, status) {
+function countdownText(days, status, nextCycleExpected) {
+  if (status === 'TBA' && nextCycleExpected) {
+    const [y, m] = nextCycleExpected.split('-')
+    return `${MONTHS[Number(m) - 1] ?? m} '${y.slice(-2)}`
+  }
+  return `${days}d`
+}
+
+function tileMarkup(conf, countdown, status) {
   const urgent = status === 'URGENT'
   const closed = status === 'CLOSED'
   const bg = urgent ? T.accent : T.paper
@@ -138,7 +151,7 @@ function tileMarkup(conf, days, status) {
                 type: 'div',
                 props: {
                   style: { fontFamily: 'PT Serif', fontSize: 130, lineHeight: 1 },
-                  children: `${days}d`,
+                  children: countdown,
                 },
               },
             ],
@@ -164,8 +177,9 @@ async function main() {
 
   for (const conf of conferences) {
     const days = Math.ceil((Date.parse(conf.deadline + 'T23:59:59Z') - Date.now()) / 86_400_000)
-    const status = statusOf(days)
-    const svg = await satori(tileMarkup(conf, days, status), { width: 1200, height: 630, fonts })
+    const status = statusOf(days, conf.nextCycleExpected)
+    const countdown = countdownText(days, status, conf.nextCycleExpected)
+    const svg = await satori(tileMarkup(conf, countdown, status), { width: 1200, height: 630, fonts })
     const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng()
     writeFileSync(join(outDir, `${conf.id}.png`), png)
   }

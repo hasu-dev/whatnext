@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, CalendarPlus, Flag, Link2, Star, TrendingUp } from 'lucide-react'
 import type { TileRect } from '../types'
-import { daysUntil, formatCountdown, statusOf } from '../lib/status'
+import { daysUntil, formatCountdown, formatExpectedMonth, statusOf } from '../lib/status'
 import { reportIssueUrl } from '../lib/github'
 import { downloadICS } from '../lib/ics'
 import { reportEvent } from '../lib/events'
@@ -23,7 +23,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   const { conf, x, y, w, h } = rect
   const [copied, setCopied] = useState(false)
   const days = daysUntil(conf.deadline)
-  const status = statusOf(days)
+  const status = statusOf(days, conf.nextCycleExpected)
   const area = w * h
 
   const copyShareLink = () => {
@@ -76,7 +76,12 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   // width and disappears entirely rather than clipping
   const metaSize = w < 100 ? 8 : narrow ? 9 : 11
   const dateW = conf.deadline.length * metaSize * 0.68
-  const countdown = formatCountdown(days)
+  // TBA tiles show the expected month of the announced next cycle where
+  // the countdown would otherwise show stale negative days
+  const countdown =
+    status === 'TBA' && conf.nextCycleExpected
+      ? formatExpectedMonth(conf.nextCycleExpected)
+      : formatCountdown(days)
   const cdBase = narrow ? 13 : small ? 16 : Math.max(18, Math.min(w * 0.2, h * 0.3, 64))
   const countdownSize = Math.min(cdBase, (avail - dateW - 10) / (countdown.length * 0.62))
   const showCountdown = !tiny && countdownSize >= 10
@@ -195,7 +200,13 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
             )}
             <dt>Submission deadline</dt>
             <dd>
-              {conf.deadline} ({status === 'CLOSED' ? 'closed' : `${days} days left`}, {conf.tz ?? 'AoE'})
+              {conf.deadline} ({days < 0 ? 'closed' : `${days} days left`}, {conf.tz ?? 'AoE'})
+              {conf.deadlineNote && <div style={{ opacity: 0.65 }}>{conf.deadlineNote}</div>}
+              {status === 'TBA' && conf.nextCycleExpected && (
+                <div style={{ opacity: 0.65 }}>
+                  Next cycle expected {formatExpectedMonth(conf.nextCycleExpected, true)} — date TBA
+                </div>
+              )}
             </dd>
             {conf.website && (
               <>

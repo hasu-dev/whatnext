@@ -11,6 +11,8 @@
   ],
   "deadline": "2026-07-26",
   "abstractDeadline": "2026-07-19",
+  "deadlineNote": "Cycle 1",
+  "nextCycleExpected": "2027-02",
   "location": "San Jose, USA",
   "website": "https://kdd2027.kdd.org",
   "weight": 10,

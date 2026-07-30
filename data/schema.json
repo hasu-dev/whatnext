@@ -49,6 +49,17 @@
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
       "description": "Optional abstract-registration deadline preceding the paper deadline."
     },
+    "deadlineNote": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 60,
+      "description": "Optional qualifier shown next to the deadline, e.g. which submission cycle it refers to."
+    },
+    "nextCycleExpected": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}$",
+      "description": "Month (YYYY-MM) an officially announced next cycle/edition is expected in, when its exact date is not yet published. While this month is in the future and the listed deadline has passed, the entry renders as TBA instead of CLOSED. Replace deadline and remove this field once the date is announced."
+    },
     "tz": {
       "type": "string",
       "maxLength": 40,

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { hierarchy, treemap, treemapSquarify } from 'd3-hierarchy'
 import type { Attention, Conference, TileRect } from '../types'
-import { daysUntil } from '../lib/status'
+import { daysUntil, statusOf } from '../lib/status'
 
 interface Args {
   conferences: Conference[]
@@ -43,19 +43,24 @@ export function estimateDetailHeight(conf: Conference): number {
  * stays comparative, not an absolute popularity chart).
  */
 // closed conferences stay on the map for reference but shouldn't occupy
-// prime real estate — their area value is dampened hard
+// prime real estate — their area value is dampened hard. TBA venues
+// (announced next cycle, date pending) are worth watching, so they keep
+// more of their space than truly closed ones.
 const CLOSED_PENALTY = 0.35
+const TBA_PENALTY = 0.6
 
 function areaValue(conf: Conference, attention: Attention | null, maxDecayed: number, maxWeight: number): number {
   const att = attention?.conferences[conf.id]
-  const closed = daysUntil(conf.deadline) < 0
+  const status = statusOf(daysUntil(conf.deadline), conf.nextCycleExpected)
   let v = conf.weight
   if (att && maxDecayed > 0) {
     const alpha = Math.min(1, att.decayed / SATURATION)
     const behavioral = (att.decayed / maxDecayed) * maxWeight * 1.4
     v = (1 - alpha) * conf.weight + alpha * behavioral
   }
-  return closed ? v * CLOSED_PENALTY : v
+  if (status === 'CLOSED') return v * CLOSED_PENALTY
+  if (status === 'TBA') return v * TBA_PENALTY
+  return v
 }
 
 export function useTreemap({ conferences, width, height, selectedId, gap, attention }: Args): TileRect[] {
