@@ -192,6 +192,77 @@ button {
   border: var(--map-frame);
 }
 
+/* hover peek card for micro cluster squares in the panorama view */
+.peek {
+  position: absolute;
+  z-index: 30;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  padding: 10px 12px;
+  pointer-events: none;
+  animation: peek-in 0.12s ease-out;
+}
+
+@keyframes peek-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.peek__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.peek__name {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: 17px;
+  color: var(--tile-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.peek__name sup {
+  font-size: 0.45em;
+  font-family: var(--font-meta);
+  margin-left: 2px;
+}
+
+.peek__status {
+  font-family: var(--font-meta);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 2px 5px;
+  border: 1px solid var(--tile-ink);
+  color: var(--tile-ink);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.peek__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 7px;
+  font-family: var(--font-meta);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+
+.peek__meta span:last-child {
+  color: var(--muted);
+}
+
 .treemap__empty {
   position: absolute;
   inset: 0;

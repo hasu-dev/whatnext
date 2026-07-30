@@ -11,6 +11,12 @@ npm run build      # validates data, builds data index + OG images + site
 npm run validate:data
 ```
 
+**Scale testing:** append `?stress=N` (max 500) to any page URL to mix N
+deterministic synthetic conferences into the map — e.g.
+`http://localhost:5173/?stress=200`. Seeded generation keeps runs
+reproducible; synthetic ids are prefixed `stress-` and never touch the
+real dataset.
+
 ## Architecture: cold / hot separation
 
 **Cold data (conferences) lives in the repo** and is bundled at build

@@ -25,11 +25,13 @@ interface Props {
   onSelect: () => void
   onFave: () => void
   onTagClick: (tag: string) => void
+  /** micro tiles report hover so the map can show a peek card */
+  onPeek: (rect: TileRect | null) => void
 }
 
 const SPRING = { type: 'spring', stiffness: 260, damping: 32, mass: 0.9 } as const
 
-export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagClick }: Props) {
+export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagClick, onPeek }: Props) {
   const { conf, x, y, w, h } = rect
   const [copied, setCopied] = useState(false)
   const days = daysUntil(conf.deadline, conf.tz)
@@ -55,6 +57,10 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   // squashed-flat tiles (short strips) switch to a single centered row
   // instead of a cramped column
   const flat = h < 84 || nameVBudget < 14
+  // at heat-map scale (hundreds of venues) the smallest cells hold just a
+  // centered name — or nothing but a hover title when even that can't fit
+  const micro = area < 5_500 || w < 52 || h < 40
+  const labelless = area < 1_800 || w < 30 || h < 20
 
   const padX = narrow ? 9 : 14
   const avail = w - padX * 2
@@ -127,20 +133,37 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
       ].join(' ')}
       initial={false}
       animate={{ left: x, top: y, width: w, height: h }}
-      transition={SPRING}
+      // micro cluster cells snap into place with a short tween — hundreds
+      // of long spring arcs read as chaotic flying; big tiles keep the
+      // spring glide
+      transition={micro ? { type: 'tween', duration: 0.18, ease: 'easeOut' } : SPRING}
       style={{
-        padding: flat ? `0 ${padX}px` : narrow ? `9px ${padX}px` : `12px ${padX}px`,
-        flexDirection: flat ? 'row' : 'column',
-        alignItems: flat ? 'center' : 'stretch',
-        gap: flat ? 12 : 0,
+        padding: micro ? '2px 4px' : flat ? `0 ${padX}px` : narrow ? `9px ${padX}px` : `12px ${padX}px`,
+        flexDirection: flat && !micro ? 'row' : 'column',
+        alignItems: micro ? 'center' : flat ? 'center' : 'stretch',
+        justifyContent: micro ? 'center' : 'space-between',
+        gap: flat && !micro ? 12 : 0,
       }}
+      onMouseEnter={micro ? () => onPeek(rect) : undefined}
+      onMouseLeave={micro ? () => onPeek(null) : undefined}
       onClick={onSelect}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
       aria-label={`${conf.name} ${conf.year}, deadline ${shortDate}`}
     >
-      {flat ? (
+      {micro ? (
+        !labelless && (
+          <div
+            className="tile__name"
+            style={{
+              fontSize: Math.max(8, Math.min(11, h * 0.4, ((w - 8) * 1.3) / conf.name.length)),
+            }}
+          >
+            {conf.name}
+          </div>
+        )
+      ) : flat ? (
         <>
           <div
             className="tile__name"

@@ -8,7 +8,8 @@ import { HelpPane } from './components/HelpPane'
 import { useTreemap } from './hooks/useTreemap'
 import { useAttention } from './hooks/useAttention'
 import { loadConferences } from './data/loader'
-import { daysUntil } from './lib/status'
+import { daysUntil, deadlineDate, formatCountdown, statusOf } from './lib/status'
+import type { TileRect } from './types'
 import { matchesQuery, parseQuery } from './lib/search'
 import { reportEvent, reportSearchMiss } from './lib/events'
 
@@ -67,6 +68,7 @@ export default function App() {
   const [favesOnly, setFavesOnly] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [peek, setPeek] = useState<TileRect | null>(null)
   const attention = useAttention()
 
   const searchRef = useRef<HTMLInputElement>(null)
@@ -177,11 +179,15 @@ export default function App() {
     // 0 would stack adjacent tile borders into uneven 2px lines
     gap: theme === 'archive' ? 6 : 1,
     attention,
+    // any active filter means the user is searching — every match gets a
+    // proportional, readable tile instead of anonymous cluster squares
+    clustered: !query.trim() && activeFields.size === 0 && !favesOnly && horizon === null,
   })
 
   const select = (id: string) => {
     const next = selectedId === id ? null : id
     setSelectedId(next)
+    setPeek(null)
     if (next) reportEvent('open', next)
   }
 
@@ -243,8 +249,37 @@ export default function App() {
               toggleFave(r.conf.id)
             }}
             onTagClick={(tag) => setQuery(`#${tag}`)}
+            onPeek={setPeek}
           />
         ))}
+        {peek &&
+          (() => {
+            const days = daysUntil(peek.conf.deadline, peek.conf.tz)
+            const status = statusOf(days, peek.conf.nextCycleExpected)
+            const cardW = 200
+            const cardH = 92
+            const left = Math.max(4, Math.min(peek.x + peek.w / 2 - cardW / 2, size.w - cardW - 4))
+            const top = peek.y - cardH - 8 >= 0 ? peek.y - cardH - 8 : peek.y + peek.h + 8
+            return (
+              <div className="peek" style={{ left, top, width: cardW }}>
+                <div className="peek__head">
+                  <span className="peek__name">
+                    {peek.conf.name}
+                    <sup>({String(peek.conf.year).slice(-2)})</sup>
+                  </span>
+                  <span className="peek__status">({status})</span>
+                </div>
+                <div className="peek__meta">
+                  <span>
+                    {peek.conf.field} · {deadlineDate(peek.conf.deadline)}
+                  </span>
+                  <span>
+                    {status === 'CLOSED' ? 'closed' : formatCountdown(days)} · click to expand
+                  </span>
+                </div>
+              </div>
+            )
+          })()}
       </main>
 
       {!zen && <Timeline conferences={visible} horizon={horizon} onHorizon={setHorizon} />}
