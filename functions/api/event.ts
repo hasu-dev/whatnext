@@ -3,12 +3,17 @@
 // no cookies, no PII. Put a Cloudflare WAF rate-limiting rule on /api/event
 // (see README); no user identifiers are used for dedup by design.
 
+import conferences from '../../data/index.json'
+
 interface Env {
   DB?: D1Database
 }
 
 const METRICS = new Set(['view', 'open', 'favorite', 'ics', 'share'])
-const SLUG = /^[a-z0-9-]{1,40}$/
+
+// only real dataset entries may be counted — bounds table cardinality and
+// keeps synthetic/fabricated ids (e.g. dev stress fixtures) out of D1
+const KNOWN_IDS = new Set((conferences as Array<{ id: string }>).map((c) => c.id))
 
 export async function upsertCount(db: D1Database, confId: string, metric: string) {
   const day = new Date().toISOString().slice(0, 10)
@@ -46,7 +51,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
       const q = (body.query ?? '').trim().toLowerCase().slice(0, 80)
       if (!q) return new Response(null, { status: 400 })
       await upsertSearchMiss(db, q)
-    } else if (body.metric && METRICS.has(body.metric) && body.conf && SLUG.test(body.conf)) {
+    } else if (body.metric && METRICS.has(body.metric) && body.conf && KNOWN_IDS.has(body.conf)) {
       await upsertCount(db, body.conf, body.metric)
     } else {
       return new Response(null, { status: 400 })

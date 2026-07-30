@@ -15,8 +15,12 @@ export function loadConferences(): Conference[] {
     .filter((conf) => !conf.archived)
     .sort((a, b) => b.weight - a.weight)
 
-  // ?stress=N appends deterministic synthetic venues for scale testing
-  const stressN = Math.min(500, Number(new URLSearchParams(location.search).get('stress')) || 0)
+  // ?stress=N appends deterministic synthetic venues for scale testing.
+  // Dev builds only: on production it would emit events for venues that
+  // don't exist and pollute the aggregate counts.
+  const stressN = import.meta.env.DEV
+    ? Math.min(500, Number(new URLSearchParams(location.search).get('stress')) || 0)
+    : 0
   if (stressN > 0) return [...real, ...generateStressConferences(stressN)]
   return real
 }
