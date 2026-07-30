@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Star } from 'lucide-react'
+import { Plus, Star } from 'lucide-react'
 import { TopBar, type ThemeName } from './components/TopBar'
 import { Tile } from './components/Tile'
 import { Timeline } from './components/Timeline'
+import { AddConference } from './components/AddConference'
 import { useTreemap } from './hooks/useTreemap'
+import { useAttention } from './hooks/useAttention'
 import { loadConferences } from './data/loader'
 import { daysUntil } from './lib/status'
+import { matchesQuery, parseQuery } from './lib/search'
+import { reportEvent, reportSearchMiss } from './lib/events'
 
 const CONFERENCES = loadConferences()
 const FIELDS = [...new Set(CONFERENCES.map((c) => c.field))].sort()
@@ -40,6 +44,8 @@ export default function App() {
   const [horizon, setHorizon] = useState<number | null>(null)
   const [zen, setZen] = useState(false)
   const [favesOnly, setFavesOnly] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
+  const attention = useAttention()
 
   const searchRef = useRef<HTMLInputElement>(null)
   const mapRef = useRef<HTMLDivElement>(null)
@@ -82,7 +88,7 @@ export default function App() {
   }, [])
 
   const visible = useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const parsed = parseQuery(query)
     return CONFERENCES.filter((c) => {
       if (favesOnly && !favorites.has(c.id)) return false
       if (activeFields.size > 0 && !activeFields.has(c.field)) return false
@@ -90,14 +96,43 @@ export default function App() {
         const days = daysUntil(c.deadline)
         if (days < 0 || days > horizon) return false
       }
-      if (!q) return true
-      return (
-        c.name.toLowerCase().includes(q) ||
-        c.fullName.toLowerCase().includes(q) ||
-        c.field.toLowerCase().includes(q)
-      )
+      return matchesQuery(c, parsed)
     })
   }, [query, activeFields, horizon, favesOnly, favorites])
+
+  // report queries that found nothing (incl. tag misses) as coverage
+  // backlog — debounced, deduped per session, no other context attached
+  const missReported = useRef(new Set<string>())
+  useEffect(() => {
+    if (!query.trim() || visible.length > 0) return
+    const q = query.trim().toLowerCase()
+    if (missReported.current.has(q)) return
+    const t = setTimeout(() => {
+      missReported.current.add(q)
+      reportSearchMiss(q)
+    }, 1200)
+    return () => clearTimeout(t)
+  }, [query, visible.length])
+
+  // trending = velocity normalized within the conference's field, so small
+  // venues can surface; never driven by absolute counts
+  const trendingIds = useMemo(() => {
+    if (!attention) return new Set<string>()
+    const byField = new Map<string, number[]>()
+    for (const c of CONFERENCES) {
+      const v = attention.conferences[c.id]?.velocity
+      if (v !== undefined) byField.set(c.field, [...(byField.get(c.field) ?? []), v])
+    }
+    const ids = new Set<string>()
+    for (const c of CONFERENCES) {
+      const v = attention.conferences[c.id]?.velocity
+      if (v === undefined) continue
+      const peers = byField.get(c.field) ?? []
+      const fieldMedian = peers.slice().sort((a, b) => a - b)[Math.floor(peers.length / 2)] || 1
+      if (v >= 1.5 && v >= fieldMedian * 1.3) ids.add(c.id)
+    }
+    return ids
+  }, [attention])
 
   const rects = useTreemap({
     conferences: visible,
@@ -107,7 +142,14 @@ export default function App() {
     // mono draws dividers via a 1px gap over the black map background;
     // 0 would stack adjacent tile borders into uneven 2px lines
     gap: theme === 'archive' ? 6 : 1,
+    attention,
   })
+
+  const select = (id: string) => {
+    const next = selectedId === id ? null : id
+    setSelectedId(next)
+    if (next) reportEvent('open', next)
+  }
 
   return (
     <div className={`app ${zen ? 'is-zen' : ''}`}>
@@ -141,6 +183,10 @@ export default function App() {
             <Star size={10} strokeWidth={1.75} fill={favesOnly ? 'currentColor' : 'none'} />
             STARRED{favorites.size > 0 ? ` (${favorites.size})` : ''}
           </button>
+          <button className="chip chip--add" onClick={() => setAddOpen(true)}>
+            <Plus size={10} strokeWidth={2} />
+            ADD CONF
+          </button>
         </div>
       )}
 
@@ -156,13 +202,20 @@ export default function App() {
             rect={r}
             selected={selectedId === r.conf.id}
             faved={favorites.has(r.conf.id)}
-            onSelect={() => setSelectedId(selectedId === r.conf.id ? null : r.conf.id)}
-            onFave={() => toggleFave(r.conf.id)}
+            trending={trendingIds.has(r.conf.id)}
+            onSelect={() => select(r.conf.id)}
+            onFave={() => {
+              if (!favorites.has(r.conf.id)) reportEvent('favorite', r.conf.id)
+              toggleFave(r.conf.id)
+            }}
+            onTagClick={(tag) => setQuery(`#${tag}`)}
           />
         ))}
       </main>
 
       {!zen && <Timeline conferences={visible} horizon={horizon} onHorizon={setHorizon} />}
+
+      {addOpen && <AddConference fields={FIELDS} onClose={() => setAddOpen(false)} />}
     </div>
   )
 }

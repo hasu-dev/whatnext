@@ -4,9 +4,15 @@
   "fullName": "International Conference on Machine Learning",
   "year": 2026,
   "field": "LEARNING",
+  "tags": [
+    "machine-learning",
+    "deep-learning",
+    "ai"
+  ],
   "deadline": "2026-01-28",
   "location": "Seoul, Korea",
   "website": "https://icml.cc",
   "weight": 20,
-  "featured": true
+  "featured": true,
+  "updatedAt": "2026-07-30"
 }

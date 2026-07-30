@@ -4,9 +4,15 @@
   "fullName": "AAAI Conference on Artificial Intelligence",
   "year": 2027,
   "field": "AI",
+  "tags": [
+    "ai",
+    "machine-learning",
+    "knowledge-representation"
+  ],
   "deadline": "2026-08-05",
   "location": "Singapore",
   "website": "https://aaai.org",
   "weight": 14,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

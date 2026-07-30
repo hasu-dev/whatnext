@@ -4,9 +4,13 @@
   "fullName": "Full Official Conference Name",
   "year": 2027,
   "field": "AI",
+  "tags": [
+    "machine-learning"
+  ],
   "deadline": "2026-12-31",
   "location": "City, Country",
   "website": "https://example.org",
   "weight": 8,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

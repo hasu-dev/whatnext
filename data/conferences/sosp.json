@@ -4,9 +4,15 @@
   "fullName": "Symposium on Operating Systems Principles",
   "year": 2026,
   "field": "SYSTEMS",
+  "tags": [
+    "operating-systems",
+    "systems",
+    "distributed-systems"
+  ],
   "deadline": "2026-04-17",
   "location": "Salt Lake City, USA",
   "website": "https://sosp.org",
   "weight": 8,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

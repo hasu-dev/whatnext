@@ -1,13 +1,18 @@
 name: Validate conference data
 
+# Rejects PRs whose entries fail the JSON schema, whose id doesn't match
+# the filename, or whose tags aren't in the controlled vocabulary
+# (data/tags.json). Extending the vocabulary is its own PR.
 on:
   pull_request:
     paths:
       - 'data/**'
+      - 'scripts/validate-data.mjs'
   push:
     branches: [main]
     paths:
       - 'data/**'
+      - 'scripts/validate-data.mjs'
 
 jobs:
   validate:

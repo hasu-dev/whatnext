@@ -4,9 +4,15 @@
   "fullName": "Knowledge Discovery and Data Mining",
   "year": 2027,
   "field": "DATA",
+  "tags": [
+    "data-mining",
+    "machine-learning",
+    "databases"
+  ],
   "deadline": "2026-08-08",
   "location": "Jeju, Korea",
   "website": "https://kdd.org",
   "weight": 10,
-  "featured": true
+  "featured": true,
+  "updatedAt": "2026-07-30"
 }

@@ -4,9 +4,15 @@
   "fullName": "ACM Symposium on User Interface Software and Technology",
   "year": 2027,
   "field": "HCI",
+  "tags": [
+    "hci",
+    "ux",
+    "ar-vr"
+  ],
   "deadline": "2026-08-12",
   "location": "Berlin, Germany",
   "website": "https://uist.acm.org",
   "weight": 6,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

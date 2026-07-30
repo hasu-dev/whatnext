@@ -4,9 +4,14 @@
   "fullName": "Programming Language Design and Implementation",
   "year": 2027,
   "field": "PL",
+  "tags": [
+    "programming-languages",
+    "compilers"
+  ],
   "deadline": "2026-11-10",
   "location": "Boston, USA",
   "website": "https://pldi.org",
   "weight": 6,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

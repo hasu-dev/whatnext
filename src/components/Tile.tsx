@@ -1,23 +1,38 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUpRight, Star } from 'lucide-react'
+import { ArrowUpRight, CalendarPlus, Flag, Link2, Star, TrendingUp } from 'lucide-react'
 import type { TileRect } from '../types'
 import { daysUntil, formatCountdown, statusOf } from '../lib/status'
+import { reportIssueUrl } from '../lib/github'
+import { downloadICS } from '../lib/ics'
+import { reportEvent } from '../lib/events'
 
 interface Props {
   rect: TileRect
   selected: boolean
   faved: boolean
+  trending: boolean
   onSelect: () => void
   onFave: () => void
+  onTagClick: (tag: string) => void
 }
 
 const SPRING = { type: 'spring', stiffness: 260, damping: 32, mass: 0.9 } as const
 
-export function Tile({ rect, selected, faved, onSelect, onFave }: Props) {
+export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagClick }: Props) {
   const { conf, x, y, w, h } = rect
+  const [copied, setCopied] = useState(false)
   const days = daysUntil(conf.deadline)
   const status = statusOf(days)
   const area = w * h
+
+  const copyShareLink = () => {
+    const url = `${location.origin}/s/${conf.id}`
+    navigator.clipboard?.writeText(url).catch(() => {})
+    reportEvent('share', conf.id)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1600)
+  }
 
   const tiny = area < 16_000 || h < 84
   const small = area < 45_000
@@ -75,6 +90,11 @@ export function Tile({ rect, selected, faved, onSelect, onFave }: Props) {
       <div className="tile__row">
         {showField ? <span className="tile__field">{conf.field}</span> : <span />}
         <span className="tile__row" style={{ gap: 6 }}>
+          {trending && !tiny && (
+            <span className="tile__trend" title="Trending: rising attention within its field">
+              <TrendingUp size={11} strokeWidth={2} />
+            </span>
+          )}
           {showStatus && <span className="tile__status">({status})</span>}
           {showIcons && (
             <button
@@ -125,9 +145,15 @@ export function Tile({ rect, selected, faved, onSelect, onFave }: Props) {
             <dd>
               {conf.location} — {conf.year}
             </dd>
+            {conf.abstractDeadline && (
+              <>
+                <dt>Abstract deadline</dt>
+                <dd>{conf.abstractDeadline}</dd>
+              </>
+            )}
             <dt>Submission deadline</dt>
             <dd>
-              {conf.deadline} ({status === 'CLOSED' ? 'closed' : `${days} days left`})
+              {conf.deadline} ({status === 'CLOSED' ? 'closed' : `${days} days left`}, {conf.tz ?? 'AoE'})
             </dd>
             {conf.website && (
               <>
@@ -144,6 +170,57 @@ export function Tile({ rect, selected, faved, onSelect, onFave }: Props) {
                 </dd>
               </>
             )}
+            {conf.tags && conf.tags.length > 0 && (
+              <>
+                <dt>Tags</dt>
+                <dd className="tile__tags">
+                  {conf.tags.map((t) => (
+                    <button
+                      key={t}
+                      className="tile__tag"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onTagClick(t)
+                      }}
+                    >
+                      #{t}
+                    </button>
+                  ))}
+                </dd>
+              </>
+            )}
+            <dd className="tile__actions">
+              <button
+                className="tile__action"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  downloadICS(conf)
+                  reportEvent('ics', conf.id)
+                }}
+              >
+                <CalendarPlus size={11} strokeWidth={1.75} /> ICS
+              </button>
+              <button
+                className="tile__action"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  copyShareLink()
+                }}
+              >
+                <Link2 size={11} strokeWidth={1.75} /> {copied ? 'COPIED' : 'SHARE'}
+              </button>
+              <a
+                className="tile__action"
+                href={reportIssueUrl(conf)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="Report a wrong or extended deadline via a prefilled GitHub issue"
+              >
+                <Flag size={11} strokeWidth={1.75} /> REPORT
+              </a>
+            </dd>
+            <dd className="tile__freshness">DATA VERIFIED {conf.updatedAt}</dd>
           </motion.dl>
         )}
       </div>

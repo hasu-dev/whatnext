@@ -4,3 +4,7 @@ dist
 worker/seed.sql
 .DS_Store
 *.local
+# build-time artifacts
+data/index.json
+public/og/
+.cache/

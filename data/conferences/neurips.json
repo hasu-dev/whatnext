@@ -4,9 +4,16 @@
   "fullName": "Conference on Neural Information Processing Systems",
   "year": 2026,
   "field": "AI/ML",
+  "tags": [
+    "machine-learning",
+    "deep-learning",
+    "ai",
+    "statistics"
+  ],
   "deadline": "2026-05-15",
   "location": "San Diego, USA",
   "website": "https://neurips.cc",
   "weight": 22,
-  "featured": true
+  "featured": true,
+  "updatedAt": "2026-07-30"
 }

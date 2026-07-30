@@ -4,9 +4,15 @@
   "fullName": "Conference on Computer Vision and Pattern Recognition",
   "year": 2027,
   "field": "VISION",
+  "tags": [
+    "computer-vision",
+    "deep-learning",
+    "multimodal"
+  ],
   "deadline": "2026-11-13",
   "location": "Denver, USA",
   "website": "https://cvpr.thecvf.com",
   "weight": 18,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

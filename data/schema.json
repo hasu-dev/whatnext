@@ -4,7 +4,7 @@
   "title": "Conference entry",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "name", "fullName", "year", "field", "deadline", "location", "weight", "featured"],
+  "required": ["id", "name", "fullName", "year", "field", "deadline", "location", "weight", "featured", "updatedAt"],
   "properties": {
     "id": {
       "type": "string",
@@ -30,12 +30,29 @@
     "field": {
       "type": "string",
       "pattern": "^[A-Z/&+ -]{2,12}$",
-      "description": "Research field tag, uppercase (e.g. VISION, NLP, SYSTEMS)."
+      "description": "Single-value primary classification, uppercase (e.g. VISION, NLP). Drives the FIELDS filter row and treemap grouping."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+      "maxItems": 8,
+      "uniqueItems": true,
+      "description": "Lowercase-hyphen slugs from the controlled vocabulary in data/tags.json. Shown as chips in the detail panel and searchable via #tag."
     },
     "deadline": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-      "description": "Paper submission deadline, ISO date (AoE assumed)."
+      "description": "Paper submission deadline, ISO date."
+    },
+    "abstractDeadline": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Optional abstract-registration deadline preceding the paper deadline."
+    },
+    "tz": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "Deadline timezone. Defaults to AoE when omitted."
     },
     "location": {
       "type": "string",
@@ -50,11 +67,20 @@
       "type": "integer",
       "minimum": 1,
       "maximum": 25,
-      "description": "Relative prominence; drives tile area in the heatmap. Rough guide: top-tier flagship 18-22, major 10-16, strong specialized 5-9, niche 1-4."
+      "description": "Cold-start prior for tile area, used until behavioral signals accumulate. Rough guide: top-tier flagship 18-22, major 10-16, strong specialized 5-9, niche 1-4."
     },
     "featured": {
       "type": "boolean",
-      "description": "Featured conferences render as accent-filled (inverted) tiles. Reserved for flagship venues; keep to roughly 1 in 4 entries."
+      "description": "Reserved flag for flagship venues; keep to roughly 1 in 4 entries."
+    },
+    "updatedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Date this entry was last verified/updated. Surfaces data freshness and orders the maintenance queue."
+    },
+    "archived": {
+      "type": "boolean",
+      "description": "Set true for past editions kept for reference; archived entries are excluded from the live treemap."
     }
   }
 }

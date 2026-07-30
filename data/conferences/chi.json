@@ -4,9 +4,15 @@
   "fullName": "Conference on Human Factors in Computing Systems",
   "year": 2027,
   "field": "HCI",
+  "tags": [
+    "hci",
+    "ux",
+    "visualization"
+  ],
   "deadline": "2026-09-11",
   "location": "Amsterdam, NL",
   "website": "https://chi2027.acm.org",
   "weight": 12,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

@@ -11,5 +11,6 @@ export function loadConferences(): Conference[] {
   return Object.entries(modules)
     .filter(([path]) => !path.includes('_TEMPLATE'))
     .map(([, conf]) => conf)
+    .filter((conf) => !conf.archived)
     .sort((a, b) => b.weight - a.weight)
 }

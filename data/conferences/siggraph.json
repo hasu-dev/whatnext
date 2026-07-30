@@ -4,9 +4,15 @@
   "fullName": "Special Interest Group on Computer Graphics",
   "year": 2027,
   "field": "GRAPHICS",
+  "tags": [
+    "graphics",
+    "rendering",
+    "ar-vr"
+  ],
   "deadline": "2027-01-22",
   "location": "Los Angeles, USA",
   "website": "https://www.siggraph.org",
   "weight": 14,
-  "featured": false
+  "featured": false,
+  "updatedAt": "2026-07-30"
 }

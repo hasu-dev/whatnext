@@ -4,9 +4,14 @@
   "fullName": "Empirical Methods in Natural Language Processing",
   "year": 2026,
   "field": "NLP",
+  "tags": [
+    "nlp",
+    "llm"
+  ],
   "deadline": "2026-05-19",
   "location": "Budapest, Hungary",
   "website": "https://2026.emnlp.org",
   "weight": 12,
-  "featured": true
+  "featured": true,
+  "updatedAt": "2026-07-30"
 }

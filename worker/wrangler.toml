@@ -1,13 +1,22 @@
-name = "whatnext-api"
+name = "whatnext-aggregator"
 main = "index.ts"
 compatibility_date = "2026-07-01"
+
+# aggregate D1 counts -> KV attention snapshot every 3 hours
+[triggers]
+crons = ["0 */3 * * *"]
 
 [[d1_databases]]
 binding = "DB"
 database_name = "whatnext"
 database_id = "REPLACE_WITH_D1_DATABASE_ID"
 
-# Optional KV cache
-# [[kv_namespaces]]
-# binding = "CACHE"
-# id = "REPLACE_WITH_KV_ID"
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# NOTE: the Pages project needs the same DB (binding "DB", for /api/event
+# and the /s/{id} view count) and the same KV namespace (binding "CACHE",
+# for /attention.json) configured in the Pages dashboard.
+# Also add a WAF rate-limiting rule on /api/event (e.g. 30 req / 10s / IP);
+# no user identifiers are used for dedup by design.

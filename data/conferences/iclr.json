@@ -4,9 +4,15 @@
   "fullName": "International Conference on Learning Representations",
   "year": 2027,
   "field": "LEARNING",
+  "tags": [
+    "machine-learning",
+    "deep-learning",
+    "representation-learning"
+  ],
   "deadline": "2026-09-24",
   "location": "Vienna, Austria",
   "website": "https://iclr.cc",
   "weight": 18,
-  "featured": true
+  "featured": true,
+  "updatedAt": "2026-07-30"
 }
