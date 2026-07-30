@@ -1,0 +1,19 @@
+{
+  "id": "siggraph-2026",
+  "name": "SIGGRAPH",
+  "fullName": "ACM SIGGRAPH Conference on Computer Graphics and Interactive Techniques",
+  "year": 2026,
+  "field": "GRAPHICS",
+  "tags": [
+    "graphics",
+    "rendering",
+    "ar-vr"
+  ],
+  "deadline": "2026-01-22",
+  "abstractDeadline": "2026-01-15",
+  "location": "Los Angeles, USA",
+  "website": "https://s2026.siggraph.org",
+  "weight": 14,
+  "featured": false,
+  "updatedAt": "2026-07-30"
+}

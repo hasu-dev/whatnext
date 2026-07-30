@@ -10,9 +10,10 @@
     "ai",
     "statistics"
   ],
-  "deadline": "2026-05-15",
+  "deadline": "2026-05-06",
+  "abstractDeadline": "2026-05-04",
   "location": "San Diego, USA",
-  "website": "https://neurips.cc",
+  "website": "https://neurips.cc/Conferences/2026",
   "weight": 22,
   "featured": true,
   "updatedAt": "2026-07-30"

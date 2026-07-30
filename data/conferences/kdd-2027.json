@@ -1,7 +1,7 @@
 {
   "id": "kdd-2027",
   "name": "KDD",
-  "fullName": "Knowledge Discovery and Data Mining",
+  "fullName": "ACM SIGKDD Conference on Knowledge Discovery and Data Mining",
   "year": 2027,
   "field": "DATA",
   "tags": [
@@ -9,9 +9,10 @@
     "machine-learning",
     "databases"
   ],
-  "deadline": "2026-08-08",
-  "location": "Jeju, Korea",
-  "website": "https://kdd.org",
+  "deadline": "2026-07-26",
+  "abstractDeadline": "2026-07-19",
+  "location": "San Jose, USA",
+  "website": "https://kdd2027.kdd.org",
   "weight": 10,
   "featured": true,
   "updatedAt": "2026-07-30"
