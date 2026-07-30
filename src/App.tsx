@@ -4,6 +4,7 @@ import { TopBar, type ThemeName } from './components/TopBar'
 import { Tile } from './components/Tile'
 import { Timeline } from './components/Timeline'
 import { AddConference } from './components/AddConference'
+import { HelpPane } from './components/HelpPane'
 import { useTreemap } from './hooks/useTreemap'
 import { useAttention } from './hooks/useAttention'
 import { loadConferences } from './data/loader'
@@ -45,6 +46,7 @@ export default function App() {
   const [zen, setZen] = useState(false)
   const [favesOnly, setFavesOnly] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const attention = useAttention()
 
   const searchRef = useRef<HTMLInputElement>(null)
@@ -73,11 +75,19 @@ export default function App() {
         // zen mode: nothing but the map
         e.preventDefault()
         setZen((z) => !z)
+      } else if (
+        ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'h') ||
+        (e.key === '?' && document.activeElement?.tagName !== 'INPUT')
+      ) {
+        // "?" as a fallback — macOS may claim ⌘H for window hiding
+        e.preventDefault()
+        setHelpOpen((v) => !v)
       } else if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
         e.preventDefault()
         setZen(false)
         searchRef.current?.focus()
       } else if (e.key === 'Escape') {
+        setHelpOpen(false)
         setZen(false)
         setSelectedId(null)
         searchRef.current?.blur()
@@ -165,7 +175,7 @@ export default function App() {
 
       {!zen && (
         <div className="filters">
-          <span className="filters__label">FIELDS /</span>
+          <span className="filters__label">Fields /</span>
           {FIELDS.map((f) => (
             <button
               key={f}
@@ -181,11 +191,11 @@ export default function App() {
             aria-pressed={favesOnly}
           >
             <Star size={10} strokeWidth={1.75} fill={favesOnly ? 'currentColor' : 'none'} />
-            STARRED{favorites.size > 0 ? ` (${favorites.size})` : ''}
+            Starred{favorites.size > 0 ? ` (${favorites.size})` : ''}
           </button>
           <button className="chip chip--add" onClick={() => setAddOpen(true)}>
             <Plus size={10} strokeWidth={2} />
-            ADD CONF
+            Add conf
           </button>
         </div>
       )}
@@ -216,6 +226,7 @@ export default function App() {
       {!zen && <Timeline conferences={visible} horizon={horizon} onHorizon={setHorizon} />}
 
       {addOpen && <AddConference fields={FIELDS} onClose={() => setAddOpen(false)} />}
+      {helpOpen && <HelpPane onClose={() => setHelpOpen(false)} />}
     </div>
   )
 }

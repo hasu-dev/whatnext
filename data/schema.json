@@ -8,8 +8,8 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^[a-z0-9-]+$",
-      "description": "Unique slug; must match the filename (<id>.json)."
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*-[0-9]{4}$",
+      "description": "Stable per-edition slug: <confname>-<year> (e.g. neurips-2026). Must match the filename (<id>.json) and end with the entry's year, so each year's edition can coexist."
     },
     "name": {
       "type": "string",

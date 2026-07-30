@@ -63,6 +63,9 @@ for (const file of files) {
     if (`${entry.id}.json` !== file) fail(`id "${entry.id}" must match filename (expected ${entry.id}.json)`)
     if (seenIds.has(entry.id)) fail(`duplicate id "${entry.id}"`)
     seenIds.add(entry.id)
+    if (entry.year && !entry.id.endsWith(`-${entry.year}`)) {
+      fail(`id "${entry.id}" must end with the edition year (-${entry.year}) so yearly editions can coexist`)
+    }
   }
   for (const key of ['deadline', 'abstractDeadline', 'updatedAt']) {
     if (entry[key] && Number.isNaN(Date.parse(entry[key]))) fail(`${key} "${entry[key]}" is not a valid date`)

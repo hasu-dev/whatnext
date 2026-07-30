@@ -18,14 +18,16 @@ when a PR is merged.
 
 1. **Copy the template.**
    Duplicate [`data/conferences/_TEMPLATE.json`](data/conferences/_TEMPLATE.json)
-   and name it after your conference's lowercase slug, e.g. `naacl.json`.
-   The filename must equal the `id` field.
+   and name it `<confname>-<year>.json`, e.g. `naacl-2027.json`. The
+   filename must equal the `id` field, and the id must end with the
+   edition year — each year's edition is its own file, so past editions
+   can be kept (`"archived": true`) alongside the current one.
 
 2. **Fill in the fields.**
 
    | Field | Meaning | Example |
    |---|---|---|
-   | `id` | Lowercase slug, must match the filename | `naacl` |
+   | `id` | `<confname>-<year>`, must match the filename | `naacl-2027` |
    | `name` | Short uppercase display name | `NAACL` |
    | `fullName` | Official conference name | `North American Chapter of the ACL` |
    | `year` | Edition year of the conference (not the deadline year) | `2027` |

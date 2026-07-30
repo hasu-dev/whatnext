@@ -6,11 +6,11 @@ import { daysUntil } from '../lib/status'
 // deadline falls within the next 7 days, and so on. NOW clears the filter.
 // Between anchors, the track shows how many deadlines land in that interval.
 const ANCHORS = [
-  { label: 'NOW', days: null as number | null, pos: 0 },
-  { label: 'WEEK', days: 7, pos: 0.18 },
-  { label: 'MONTH', days: 30, pos: 0.42 },
-  { label: 'QUARTER', days: 90, pos: 0.7 },
-  { label: 'YEAR', days: 365, pos: 1 },
+  { label: 'Now', days: null as number | null, pos: 0 },
+  { label: 'Week', days: 7, pos: 0.18 },
+  { label: 'Month', days: 30, pos: 0.42 },
+  { label: 'Quarter', days: 90, pos: 0.7 },
+  { label: 'Year', days: 365, pos: 1 },
 ]
 
 function labelTransform(pos: number): string {

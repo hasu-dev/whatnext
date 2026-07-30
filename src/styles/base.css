@@ -52,8 +52,7 @@ button {
 .topbar__brand {
   font-family: var(--font-meta);
   font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -90,8 +89,7 @@ button {
   color: var(--ink);
   font-family: var(--font-meta);
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .search input::placeholder {
@@ -129,10 +127,9 @@ button {
 .theme-toggle button {
   font-family: var(--font-meta);
   font-size: 10px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   padding: 6px 12px;
   color: var(--ink);
-  text-transform: uppercase;
 }
 
 .theme-toggle button.is-active {
@@ -160,11 +157,10 @@ button {
 .chip {
   font-family: var(--font-meta);
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   padding: 4px 10px;
   border: 1px solid var(--line);
   color: var(--tile-ink);
-  text-transform: uppercase;
 }
 
 .chip.is-active {
@@ -489,10 +485,9 @@ button {
   position: absolute;
   top: 0;
   font-family: var(--font-meta);
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
   color: var(--muted);
-  text-transform: uppercase;
   white-space: nowrap;
   padding: 1px 3px;
 }
@@ -624,6 +619,58 @@ button {
   background: var(--accent);
   color: var(--accent-ink);
   white-space: nowrap;
+}
+
+/* ---------- Help pane ---------- */
+
+.help__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.help__title {
+  font-family: var(--font-meta);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.help__row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-family: var(--font-meta);
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.help__row kbd {
+  flex-shrink: 0;
+  min-width: 110px;
+  font-family: var(--font-meta);
+  font-size: 10px;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  color: var(--tile-ink);
+  text-align: center;
+}
+
+.help__row span {
+  line-height: 1.5;
+}
+
+.help__foot {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-meta);
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--muted);
 }
 
 .timeline__count {

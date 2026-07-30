@@ -13,7 +13,6 @@ interface Props {
 // No token, no proxy — the user's own GitHub session does the work.
 export function AddConference({ fields, onClose }: Props) {
   const [form, setForm] = useState({
-    id: '',
     name: '',
     fullName: '',
     year: new Date().getFullYear() + 1,
@@ -37,14 +36,17 @@ export function AddConference({ fields, onClose }: Props) {
   const toggleTag = (t: string) =>
     setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : prev.length < 8 ? [...prev, t] : prev))
 
+  // stable per-edition id: <confname>-<year>, derived so it can't drift
+  // from the filename convention
+  const derivedId = `${form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${form.year}`
+
   const submit = () => {
-    if (!/^[a-z0-9-]+$/.test(form.id)) return setError('id must be a lowercase slug (a-z, 0-9, -)')
     if (!/^[A-Z0-9/&+ -]{2,16}$/.test(form.name)) return setError('short name must be 2-16 uppercase chars')
     if (form.fullName.length < 8) return setError('full name looks too short')
     if (!/^\d{4}-\d{2}-\d{2}$/.test(form.deadline)) return setError('deadline must be YYYY-MM-DD')
     if (form.website && !form.website.startsWith('https://')) return setError('website must start with https://')
     const entry: Record<string, unknown> = {
-      id: form.id,
+      id: derivedId,
       name: form.name,
       fullName: form.fullName,
       year: Number(form.year),
@@ -72,10 +74,6 @@ export function AddConference({ fields, onClose }: Props) {
         </div>
 
         <div className="modal__grid">
-          <label>
-            ID (slug)
-            <input value={form.id} onChange={(e) => set('id', e.target.value.toLowerCase())} placeholder="naacl" />
-          </label>
           <label>
             SHORT NAME
             <input value={form.name} onChange={(e) => set('name', e.target.value.toUpperCase())} placeholder="NAACL" />
@@ -137,7 +135,10 @@ export function AddConference({ fields, onClose }: Props) {
         {error && <div className="modal__error">{error}</div>}
 
         <div className="modal__foot">
-          <span className="modal__hint">Review the JSON on GitHub, then open the pull request. CI validates it.</span>
+          <span className="modal__hint">
+            {form.name ? `File: data/conferences/${derivedId}.json — ` : ''}
+            Review the JSON on GitHub, then open the pull request. CI validates it.
+          </span>
           <button className="modal__submit" onClick={submit}>
             CONTINUE ON GITHUB ↗
           </button>
