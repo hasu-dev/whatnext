@@ -10,6 +10,16 @@ body,
   height: 100%;
 }
 
+/* mobile browsers: track the *dynamic* viewport so the collapsing URL
+   bar never clips the timeline */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
 body {
   background: var(--bg);
   color: var(--ink);
@@ -45,8 +55,21 @@ button {
 .topbar {
   display: grid;
   grid-template-columns: 1fr minmax(280px, 480px) 1fr;
+  grid-template-areas: 'brand search right';
   align-items: center;
   gap: 16px;
+}
+
+.topbar__brand {
+  grid-area: brand;
+}
+
+.topbar .search {
+  grid-area: search;
+}
+
+.topbar__right {
+  grid-area: right;
 }
 
 .topbar__brand {
@@ -290,24 +313,24 @@ button {
   text-align: left;
 }
 
-.tile.is-urgent {
+:is(.tile, .card).is-urgent {
   background: var(--tile-urgent-bg);
   color: var(--tile-urgent-ink);
   border-color: var(--tile-urgent-bg);
 }
 
-.tile.is-approaching {
+:is(.tile, .card).is-approaching {
   background: var(--tile-approaching-bg);
   color: var(--tile-approaching-ink);
 }
 
-.tile.is-closed {
+:is(.tile, .card).is-closed {
   background: var(--tile-bg);
   color: var(--tile-closed-ink);
   border-color: var(--tile-closed-line);
 }
 
-.tile.is-closed .tile__name {
+:is(.tile, .card).is-closed .tile__name {
   text-decoration: line-through;
   text-decoration-thickness: 2px;
 }
@@ -446,8 +469,23 @@ button {
 
 /* on scan-line (approaching) tiles, action chips get a solid base so the
    hatching never runs through their text */
-.tile.is-approaching .tile__action {
+:is(.tile, .card).is-approaching .tile__action {
   background: var(--tile-bg);
+}
+
+/* ---------- Mobile feed: scrollable two-column treemap masonry ---------- */
+
+.feed {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.feed__canvas {
+  position: relative;
+  width: 100%;
 }
 
 .tile__name {
@@ -625,6 +663,9 @@ button {
 }
 
 .modal__grid input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   border: 1px solid var(--line);
   background: var(--bg);
   color: var(--ink);
@@ -796,6 +837,87 @@ button {
   font-size: 10px;
   line-height: 1.7;
   color: var(--muted);
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 640px) {
+  .app {
+    padding: 10px 10px 8px;
+    gap: 8px;
+  }
+
+  /* brand + theme toggle on the first row, search full-width below */
+  .topbar {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'brand right'
+      'search search';
+    gap: 8px 12px;
+  }
+
+  /* keyboard hints mean nothing to touch */
+  .topbar__hint {
+    display: none;
+  }
+
+  .search {
+    padding: 8px 12px;
+  }
+
+  .search kbd {
+    display: none;
+  }
+
+  /* 16px stops iOS from auto-zooming focused inputs */
+  .search input,
+  .modal__grid input {
+    font-size: 16px;
+  }
+
+  .filters {
+    gap: 5px;
+  }
+
+  .modal__panel {
+    padding: 14px 14px;
+    max-height: calc(100dvh - 32px);
+  }
+
+  .modal__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .modal__foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .help__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .help__row kbd {
+    min-width: 88px;
+  }
+
+  /* bigger touch targets for the in-tile icons and timeline filters */
+  .tile__star,
+  .tile__link {
+    padding: 5px;
+  }
+
+  .tile__action {
+    padding: 9px 14px;
+  }
+
+  .timeline {
+    padding: 8px 10px 10px;
+  }
+
+  .timeline__label {
+    padding: 4px 5px;
+  }
 }
 
 .timeline__count {

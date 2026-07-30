@@ -56,6 +56,58 @@ function areaValue(conf: Conference, attention: Attention | null, maxDecayed: nu
   return significance * urgencyFactor(conf)
 }
 
+function computeValues(conferences: Conference[], attention: Attention | null): Map<string, number> {
+  const maxWeight = Math.max(...conferences.map((c) => c.weight))
+  const maxDecayed = Math.max(0, ...conferences.map((c) => attention?.conferences[c.id]?.decayed ?? 0))
+  return new Map(conferences.map((c) => [c.id, areaValue(c, attention, maxDecayed, maxWeight)]))
+}
+
+/** Same significance × urgency ordering the map uses — for the mobile feed. */
+export function rankByValue(conferences: Conference[], attention: Attention | null): Conference[] {
+  if (conferences.length === 0) return []
+  const values = computeValues(conferences, attention)
+  return [...conferences].sort((a, b) => (values.get(b.id) ?? 0) - (values.get(a.id) ?? 0))
+}
+
+/**
+ * Two-column treemap for phones: a scrollable masonry where tile HEIGHT
+ * carries the significance × urgency signal (a 1-D slice layout per
+ * column, balanced greedily). The selected tile breaks out to span both
+ * columns at its position so the detail panel has room.
+ */
+export function mobileColumnLayout(
+  conferences: Conference[],
+  attention: Attention | null,
+  width: number,
+  selectedId: string | null,
+  gap: number,
+): { tiles: TileRect[]; height: number } {
+  if (!width || conferences.length === 0) return { tiles: [], height: 0 }
+  const ranked = rankByValue(conferences, attention)
+  const values = computeValues(conferences, attention)
+  const maxV = Math.max(...values.values())
+  const colW = (width - gap) / 2
+  const colY = [0, 0]
+  const tiles: TileRect[] = []
+
+  for (const conf of ranked) {
+    if (conf.id === selectedId) {
+      // full-width breakout, sized to fit the detail content
+      const y = Math.max(colY[0], colY[1])
+      const h = Math.min(estimateDetailHeight(conf), 620)
+      tiles.push({ x: 0, y, w: width, h, conf })
+      colY[0] = colY[1] = y + h + gap
+      continue
+    }
+    const v = (values.get(conf.id) ?? 0) / maxV
+    const h = Math.round(88 + v * 210)
+    const col = colY[0] <= colY[1] ? 0 : 1
+    tiles.push({ x: col * (colW + gap), y: colY[col], w: colW, h, conf })
+    colY[col] += h + gap
+  }
+  return { tiles, height: Math.max(colY[0], colY[1]) }
+}
+
 /**
  * Rough pixel height the expanded detail needs for THIS conference —
  * header + name + every detail row it will actually render. The boost
@@ -81,9 +133,7 @@ export function useTreemap({ conferences, width, height, selectedId, gap, attent
   return useMemo(() => {
     if (!width || !height || conferences.length === 0) return []
 
-    const maxWeight = Math.max(...conferences.map((c) => c.weight))
-    const maxDecayed = Math.max(0, ...conferences.map((c) => attention?.conferences[c.id]?.decayed ?? 0))
-    const values = new Map(conferences.map((c) => [c.id, areaValue(c, attention, maxDecayed, maxWeight)]))
+    const values = computeValues(conferences, attention)
     const maxValue = Math.max(...values.values())
 
     // Beyond the flagship count, the long tail is first MERGED: tail
@@ -168,9 +218,12 @@ export function useTreemap({ conferences, width, height, selectedId, gap, attent
       const base = values.get(selectedId)!
       const total = [...values.values()].reduce((a, b) => a + b, 0)
       const floor = Math.max(base * 2, maxValue * 1.15)
-      const cap = Math.max(floor, total - base)
+      // phone-sized maps let the selection take up to ~75% of the area —
+      // the desktop 50% cap can never fit the detail panel there
+      const smallMap = width < 480
+      const cap = Math.max(floor, (total - base) * (smallMap ? 3 : 1))
       const targetH = Math.min(height * 0.85, estimateDetailHeight(selConf))
-      const targetW = Math.min(width * 0.8, 320)
+      const targetW = Math.min(width * (smallMap ? 0.92 : 0.8), 320)
 
       let boost = Math.min(Math.max(base * 4, maxValue * 1.3), cap)
       leaves = layout(boost)

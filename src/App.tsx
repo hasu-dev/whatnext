@@ -5,8 +5,9 @@ import { Tile } from './components/Tile'
 import { Timeline } from './components/Timeline'
 import { AddConference } from './components/AddConference'
 import { HelpPane } from './components/HelpPane'
-import { useTreemap } from './hooks/useTreemap'
+import { mobileColumnLayout, useTreemap } from './hooks/useTreemap'
 import { useAttention } from './hooks/useAttention'
+import { useIsMobile } from './hooks/useIsMobile'
 import { loadConferences } from './data/loader'
 import { daysUntil, deadlineDate, formatCountdown, statusOf } from './lib/status'
 import type { TileRect } from './types'
@@ -69,6 +70,7 @@ export default function App() {
   const [addOpen, setAddOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [peek, setPeek] = useState<TileRect | null>(null)
+  const isMobile = useIsMobile()
   const attention = useAttention()
 
   const searchRef = useRef<HTMLInputElement>(null)
@@ -230,6 +232,41 @@ export default function App() {
         </div>
       )}
 
+      {isMobile ? (
+        // phones keep the treemap language in a scrollable two-column
+        // masonry: tile height carries significance × urgency, the
+        // selected tile spans both columns for its detail
+        <main className="feed" ref={mapRef}>
+          {visible.length === 0 && (
+            <div className="treemap__empty">
+              {favesOnly ? 'NO STARRED CONFERENCES YET — TAP A ☆ ON A CARD' : 'NO CONFERENCES MATCH'}
+            </div>
+          )}
+          {(() => {
+            const { tiles, height } = mobileColumnLayout(visible, attention, size.w, selectedId, 8)
+            return (
+              <div className="feed__canvas" style={{ height }}>
+                {tiles.map((r) => (
+                  <Tile
+                    key={r.conf.id}
+                    rect={r}
+                    selected={selectedId === r.conf.id}
+                    faved={favorites.has(r.conf.id)}
+                    trending={trendingIds.has(r.conf.id)}
+                    onSelect={() => select(r.conf.id)}
+                    onFave={() => {
+                      if (!favorites.has(r.conf.id)) reportEvent('favorite', r.conf.id)
+                      toggleFave(r.conf.id)
+                    }}
+                    onTagClick={(tag) => setQuery(`#${tag}`)}
+                    onPeek={() => {}}
+                  />
+                ))}
+              </div>
+            )
+          })()}
+        </main>
+      ) : (
       <main className="treemap" ref={mapRef}>
         {rects.length === 0 && (
           <div className="treemap__empty">
@@ -281,6 +318,7 @@ export default function App() {
             )
           })()}
       </main>
+      )}
 
       {!zen && <Timeline conferences={visible} horizon={horizon} onHorizon={setHorizon} />}
 

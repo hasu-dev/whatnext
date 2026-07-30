@@ -48,7 +48,10 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
 
   const tiny = area < 16_000 || h < 84
   const small = area < 45_000
-  const large = area > 120_000
+  // detail eligibility: big by area, or big enough in both dimensions —
+  // phone-sized maps can never reach the desktop area threshold even
+  // when the selected tile fills most of the screen
+  const large = area > 120_000 || (w >= 280 && h >= 320)
   const narrow = w < 150
   // vertical room left for the name once padding, the header row, and the
   // bottom row have taken theirs — the column layout must never let the
