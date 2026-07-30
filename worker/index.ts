@@ -5,6 +5,9 @@
 export interface Env {
   DB: D1Database
   CACHE: KVNamespace
+  // set via `wrangler secret put ADMIN_TOKEN`; the fetch endpoints refuse
+  // all requests until it exists
+  ADMIN_TOKEN?: string
 }
 
 // intent-ordered weights: the stronger the intent, the higher the weight
@@ -75,9 +78,16 @@ export default {
     ctx.waitUntil(runAggregation(env))
   },
 
-  // manual trigger / inspection endpoint (also useful right after deploy,
-  // before the first cron tick)
+  // manual trigger / inspection endpoints (useful right after deploy,
+  // before the first cron tick). Maintainer-only: requires
+  // `Authorization: Bearer <ADMIN_TOKEN>`, and denies everything when the
+  // secret is unset rather than defaulting open.
   async fetch(req: Request, env: Env): Promise<Response> {
+    const auth = req.headers.get('authorization')
+    if (!env.ADMIN_TOKEN || auth !== `Bearer ${env.ADMIN_TOKEN}`) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
     const url = new URL(req.url)
     if (url.pathname === '/aggregate' && req.method === 'POST') {
       const snapshot = await runAggregation(env)

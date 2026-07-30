@@ -75,7 +75,9 @@ wrangler d1 execute whatnext --file=worker/schema.sql --remote
 wrangler kv namespace create whatnext-cache # id → worker/wrangler.toml
 
 # Cron aggregator
-cd worker && wrangler deploy
+cd worker
+wrangler secret put ADMIN_TOKEN   # guards /aggregate and /search-misses
+wrangler deploy
 
 # Site → Cloudflare Pages (build command: npm run build, output: dist)
 # In the Pages project settings, bind:

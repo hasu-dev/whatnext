@@ -15,6 +15,10 @@ database_id = "REPLACE_WITH_D1_DATABASE_ID"
 binding = "CACHE"
 id = "REPLACE_WITH_KV_NAMESPACE_ID"
 
+# Maintainer endpoints (/aggregate, /search-misses) require a bearer
+# token; create it with: wrangler secret put ADMIN_TOKEN
+# They deny all requests until the secret exists.
+
 # NOTE: the Pages project needs the same DB (binding "DB", for /api/event
 # and the /s/{id} view count) and the same KV namespace (binding "CACHE",
 # for /attention.json) configured in the Pages dashboard.
