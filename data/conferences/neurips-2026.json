@@ -10,8 +10,8 @@
     "ai",
     "statistics"
   ],
-  "deadline": "2026-05-06",
-  "abstractDeadline": "2026-05-04",
+  "deadline": "2026-05-06T23:59:59",
+  "abstractDeadline": "2026-05-04T23:59:59",
   "location": "Sydney, Australia",
   "website": "https://neurips.cc/Conferences/2026",
   "weight": 22,

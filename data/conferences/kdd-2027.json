@@ -9,8 +9,8 @@
     "machine-learning",
     "databases"
   ],
-  "deadline": "2026-07-26",
-  "abstractDeadline": "2026-07-19",
+  "deadline": "2026-07-26T23:59:59",
+  "abstractDeadline": "2026-07-19T23:59:59",
   "deadlineNote": "Cycle 1",
   "nextCycleExpected": "2027-02",
   "location": "San Jose, USA",

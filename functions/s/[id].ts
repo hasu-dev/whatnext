@@ -19,11 +19,22 @@ interface ConfEntry {
   year: number
   field: string
   deadline: string
+  tz?: string
   location: string
 }
 
 const esc = (s: string) =>
   s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+
+// mirrors src/lib/status.ts: cutoff = end of the deadline day in the
+// entry's timezone, default AoE (UTC-12)
+function tzOffset(tz?: string): string {
+  if (!tz || tz === 'AoE') return '-12:00'
+  if (tz === 'UTC') return '+00:00'
+  const m = /^UTC([+-])(\d{1,2})(?::(\d{2}))?$/.exec(tz)
+  if (m) return `${m[1]}${m[2].padStart(2, '0')}:${m[3] ?? '00'}`
+  return '-12:00'
+}
 
 export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const url = new URL(ctx.request.url)
@@ -33,9 +44,10 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const conf = (conferences as ConfEntry[]).find((c) => c.id === id)
   if (!conf) return shell // unmatched id falls back to the plain SPA
 
-  const days = Math.ceil((Date.parse(conf.deadline + 'T23:59:59Z') - Date.now()) / 86_400_000)
-  const countdown = days < 0 ? 'submissions closed' : `${days} days left`
-  const title = `${conf.name} ${conf.year} — deadline ${conf.deadline}`
+  const stamp = conf.deadline.includes('T') ? conf.deadline : `${conf.deadline}T23:59:59`
+  const msLeft = Date.parse(`${stamp}${tzOffset(conf.tz)}`) - Date.now()
+  const countdown = msLeft < 0 ? 'submissions closed' : `${Math.ceil(msLeft / 86_400_000)} days left`
+  const title = `${conf.name} ${conf.year} — deadline ${conf.deadline.slice(0, 10)}`
   const description = `${conf.fullName} · ${conf.location} · ${countdown}. Track it on WHATNEXT.`
   const image = `${url.origin}/og/${conf.id}.png`
   const canonical = `${url.origin}/s/${conf.id}`

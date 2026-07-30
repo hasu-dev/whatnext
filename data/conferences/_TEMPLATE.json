@@ -7,7 +7,7 @@
   "tags": [
     "machine-learning"
   ],
-  "deadline": "2026-12-31",
+  "deadline": "2026-12-31T23:59:59",
   "location": "City, Country",
   "website": "https://example.org",
   "weight": 8,

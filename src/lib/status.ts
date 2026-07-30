@@ -3,9 +3,45 @@ import type { Status } from '../types'
 const DAY = 86_400_000
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-export function daysUntil(deadline: string, now = new Date()): number {
-  const d = new Date(deadline + 'T23:59:59')
-  return Math.ceil((d.getTime() - now.getTime()) / DAY)
+/**
+ * Deadlines are dates; the actual cutoff moment is the end of that day
+ * (23:59:59) in the entry's timezone. "AoE" (UTC-12) is the academic
+ * default. Fixed offsets ("UTC", "UTC+8", "UTC-5:30") keep every runtime
+ * — browser, edge function, build script — computing the same instant
+ * without shipping a tz database; for DST zones contributors record the
+ * offset in effect on the deadline date.
+ */
+function tzOffset(tz?: string): string {
+  if (!tz || tz === 'AoE') return '-12:00'
+  if (tz === 'UTC') return '+00:00'
+  const m = /^UTC([+-])(\d{1,2})(?::(\d{2}))?$/.exec(tz)
+  if (m) return `${m[1]}${m[2].padStart(2, '0')}:${m[3] ?? '00'}`
+  return '-12:00' // unknown value → AoE, the conservative default
+}
+
+/**
+ * Exact cutoff instant (ms since epoch). Deadlines are stored as full
+ * local timestamps (YYYY-MM-DDTHH:MM:SS) interpreted in the entry's
+ * timezone; a bare date (legacy) falls back to end of day.
+ */
+export function deadlineCutoffMs(deadline: string, tz?: string): number {
+  const stamp = deadline.includes('T') ? deadline : `${deadline}T23:59:59`
+  return Date.parse(`${stamp}${tzOffset(tz)}`)
+}
+
+/** Date part of a deadline timestamp, for compact tile display. */
+export function deadlineDate(deadline: string): string {
+  return deadline.slice(0, 10)
+}
+
+/**
+ * Whole days until the cutoff. Positive values are ceil'd ("due within
+ * N days"); once the exact cutoff second passes the value goes negative
+ * immediately — there is no ambiguous day-zero window.
+ */
+export function daysUntil(deadline: string, tz?: string, now = new Date()): number {
+  const ms = deadlineCutoffMs(deadline, tz) - now.getTime()
+  return ms >= 0 ? Math.ceil(ms / DAY) : Math.floor(ms / DAY)
 }
 
 /**
@@ -26,6 +62,31 @@ export function statusOf(days: number, nextCycleExpected?: string): Status {
 
 export function formatCountdown(days: number): string {
   return `${days}d`
+}
+
+/** Human label for the entry's timezone, e.g. "AoE (UTC−12)". */
+export function tzLabel(tz?: string): string {
+  if (!tz || tz === 'AoE') return 'AoE (UTC−12)'
+  return tz
+}
+
+/** Fine-grained remaining time for the detail panel, e.g. "57d 14h left". */
+export function formatRemaining(msLeft: number): string {
+  if (msLeft < 0) return 'closed'
+  const d = Math.floor(msLeft / DAY)
+  const h = Math.floor((msLeft % DAY) / 3_600_000)
+  return d > 0 ? `${d}d ${h}h left` : `${h}h ${Math.floor((msLeft % 3_600_000) / 60_000)}m left`
+}
+
+/** The cutoff instant rendered in the viewer's local time. */
+export function formatLocalCutoff(msCutoff: number): string {
+  return new Date(msCutoff).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 /** "2027-02" → "Feb '27" (short) or "Feb 2027" (long) */

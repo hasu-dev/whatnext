@@ -1,19 +1,23 @@
 import type { Conference } from '../types'
+import { deadlineCutoffMs, deadlineDate } from './status'
 
-// Client-side .ics generation — no backend involved.
+const compactUtc = (ms: number) => new Date(ms).toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z'
+
+// Client-side .ics generation — no backend involved. The event carries
+// the exact cutoff instant (converted to UTC), not just the date.
 export function downloadICS(conf: Conference) {
-  const date = conf.deadline.replaceAll('-', '')
-  const stamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z'
+  const cutoff = deadlineCutoffMs(conf.deadline, conf.tz)
+  const stamp = compactUtc(Date.now())
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//whatnext//conference-deadlines//EN',
     'BEGIN:VEVENT',
-    `UID:${conf.id}-${conf.deadline}@whatnext`,
+    `UID:${conf.id}-${deadlineDate(conf.deadline)}@whatnext`,
     `DTSTAMP:${stamp}`,
-    `DTSTART;VALUE=DATE:${date}`,
+    `DTSTART:${compactUtc(cutoff)}`,
     `SUMMARY:${conf.name} ${conf.year} submission deadline`,
-    `DESCRIPTION:${conf.fullName} — paper deadline (${conf.tz ?? 'AoE'})${conf.website ? `\\n${conf.website}` : ''}`,
+    `DESCRIPTION:${conf.fullName} — paper cutoff ${conf.deadline.replace('T', ' ')} (${conf.tz ?? 'AoE'})${conf.website ? `\\n${conf.website}` : ''}`,
     ...(conf.website ? [`URL:${conf.website}`] : []),
     'BEGIN:VALARM',
     'TRIGGER:-P7D',

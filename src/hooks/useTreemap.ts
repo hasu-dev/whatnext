@@ -27,7 +27,8 @@ export function estimateDetailHeight(conf: Conference): number {
   px += 20 + Math.ceil(conf.fullName.length / 38) * 19 // full name
   px += 39 // venue
   if (conf.abstractDeadline) px += 39
-  px += 39 // deadline
+  px += 57 // deadline incl. local-time/countdown line
+  if (conf.deadlineNote) px += 18
   if (conf.website) px += 39
   const tagCount = conf.tags?.length ?? 0
   if (tagCount > 0) px += 20 + Math.ceil(tagCount / 3) * 24 // text-style tag rows
@@ -51,7 +52,7 @@ const TBA_PENALTY = 0.6
 
 function areaValue(conf: Conference, attention: Attention | null, maxDecayed: number, maxWeight: number): number {
   const att = attention?.conferences[conf.id]
-  const status = statusOf(daysUntil(conf.deadline), conf.nextCycleExpected)
+  const status = statusOf(daysUntil(conf.deadline, conf.tz), conf.nextCycleExpected)
   let v = conf.weight
   if (att && maxDecayed > 0) {
     const alpha = Math.min(1, att.decayed / SATURATION)

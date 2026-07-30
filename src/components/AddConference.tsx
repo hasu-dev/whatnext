@@ -54,7 +54,8 @@ export function AddConference({ fields, onClose }: Props) {
   const submit = () => {
     if (!/^[A-Z0-9/&+ -]{2,16}$/.test(form.name)) return setError('short name must be 2-16 uppercase chars')
     if (form.fullName.length < 8) return setError('full name looks too short')
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(form.deadline)) return setError('deadline must be YYYY-MM-DD')
+    if (!/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?$/.test(form.deadline))
+      return setError('deadline must be YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS')
     if (form.website && !form.website.startsWith('https://')) return setError('website must start with https://')
     const entry: Record<string, unknown> = {
       id: derivedId,
@@ -63,7 +64,8 @@ export function AddConference({ fields, onClose }: Props) {
       year: Number(form.year),
       field: form.field,
       ...(tags.length > 0 ? { tags } : {}),
-      deadline: form.deadline,
+      // date-only input normalizes to end of day; explicit times pass through
+      deadline: form.deadline.includes('T') ? form.deadline : `${form.deadline}T23:59:59`,
       location: form.location,
       ...(form.website ? { website: form.website } : {}),
       weight: TIERS[tier].weight,
@@ -115,8 +117,12 @@ export function AddConference({ fields, onClose }: Props) {
             </datalist>
           </label>
           <label>
-            DEADLINE (YYYY-MM-DD)
-            <input value={form.deadline} onChange={(e) => set('deadline', e.target.value)} placeholder="2026-12-15" />
+            DEADLINE (DATE OR DATE+TIME)
+            <input
+              value={form.deadline}
+              onChange={(e) => set('deadline', e.target.value)}
+              placeholder="2026-12-15 or 2026-12-15T22:00:00"
+            />
           </label>
           <label>
             LOCATION

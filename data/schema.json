@@ -41,13 +41,13 @@
     },
     "deadline": {
       "type": "string",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-      "description": "Paper submission deadline, ISO date."
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+      "description": "Paper submission cutoff as a full local timestamp (YYYY-MM-DDTHH:MM:SS), interpreted in the entry's tz. Use T23:59:59 for end-of-day deadlines."
     },
     "abstractDeadline": {
       "type": "string",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-      "description": "Optional abstract-registration deadline preceding the paper deadline."
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+      "description": "Optional abstract-registration cutoff preceding the paper deadline, same format and timezone as deadline."
     },
     "deadlineNote": {
       "type": "string",
@@ -62,8 +62,8 @@
     },
     "tz": {
       "type": "string",
-      "maxLength": 40,
-      "description": "Deadline timezone. Defaults to AoE when omitted."
+      "pattern": "^(AoE|UTC([+-]\\d{1,2}(:\\d{2})?)?)$",
+      "description": "Deadline timezone: AoE (default when omitted), UTC, or a fixed offset like UTC+8 / UTC-5:30. The deadline timestamp is interpreted in this timezone. For DST zones, use the offset in effect on the deadline date."
     },
     "location": {
       "type": "string",

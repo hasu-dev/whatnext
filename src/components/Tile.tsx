@@ -2,7 +2,17 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, CalendarPlus, Flag, Link2, Star, TrendingUp } from 'lucide-react'
 import type { TileRect } from '../types'
-import { daysUntil, formatCountdown, formatExpectedMonth, statusOf } from '../lib/status'
+import {
+  daysUntil,
+  deadlineCutoffMs,
+  deadlineDate,
+  formatCountdown,
+  formatExpectedMonth,
+  formatLocalCutoff,
+  formatRemaining,
+  statusOf,
+  tzLabel,
+} from '../lib/status'
 import { reportIssueUrl } from '../lib/github'
 import { downloadICS } from '../lib/ics'
 import { reportEvent } from '../lib/events'
@@ -22,7 +32,7 @@ const SPRING = { type: 'spring', stiffness: 260, damping: 32, mass: 0.9 } as con
 export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagClick }: Props) {
   const { conf, x, y, w, h } = rect
   const [copied, setCopied] = useState(false)
-  const days = daysUntil(conf.deadline)
+  const days = daysUntil(conf.deadline, conf.tz)
   const status = statusOf(days, conf.nextCycleExpected)
   const area = w * h
 
@@ -75,7 +85,8 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   // bottom row: date is fixed, the countdown shrinks into the leftover
   // width and disappears entirely rather than clipping
   const metaSize = w < 100 ? 8 : narrow ? 9 : 11
-  const dateW = conf.deadline.length * metaSize * 0.68
+  const shortDate = deadlineDate(conf.deadline)
+  const dateW = shortDate.length * metaSize * 0.68
   // TBA tiles show the expected month of the announced next cycle where
   // the countdown would otherwise show stale negative days
   const countdown =
@@ -108,7 +119,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
-      aria-label={`${conf.name} ${conf.year}, deadline ${conf.deadline}`}
+      aria-label={`${conf.name} ${conf.year}, deadline ${shortDate}`}
     >
       {flat ? (
         <>
@@ -120,7 +131,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
             {showSup && <sup>({String(conf.year).slice(-2)})</sup>}
           </div>
           <div className="tile__meta" style={{ fontSize: 9, marginLeft: 'auto' }}>
-            <span>{conf.deadline}</span>
+            <span>{shortDate}</span>
           </div>
           {w > 230 && (
             <div className="tile__countdown" style={{ fontSize: Math.min(h * 0.4, 15) }}>
@@ -195,12 +206,16 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
             {conf.abstractDeadline && (
               <>
                 <dt>Abstract deadline</dt>
-                <dd>{conf.abstractDeadline}</dd>
+                <dd>{conf.abstractDeadline.replace('T', ' ')}</dd>
               </>
             )}
             <dt>Submission deadline</dt>
             <dd>
-              {conf.deadline} ({days < 0 ? 'closed' : `${days} days left`}, {conf.tz ?? 'AoE'})
+              {conf.deadline.replace('T', ' ')} {tzLabel(conf.tz)}
+              <div style={{ opacity: 0.65 }}>
+                Your time: {formatLocalCutoff(deadlineCutoffMs(conf.deadline, conf.tz))} ·{' '}
+                {formatRemaining(deadlineCutoffMs(conf.deadline, conf.tz) - Date.now())}
+              </div>
               {conf.deadlineNote && <div style={{ opacity: 0.65 }}>{conf.deadlineNote}</div>}
               {status === 'TBA' && conf.nextCycleExpected && (
                 <div style={{ opacity: 0.65 }}>
@@ -292,7 +307,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
             transition={{ duration: 0.18 }}
           >
             <div className="tile__meta" style={{ fontSize: metaSize }}>
-              <span>{conf.deadline}</span>
+              <span>{shortDate}</span>
               {large && !selected && <span style={{ opacity: 0.6 }}>{conf.field}</span>}
             </div>
             {showCountdown && (

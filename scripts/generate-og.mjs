@@ -49,6 +49,16 @@ async function loadFonts() {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+// mirrors src/lib/status.ts: cutoff = end of the deadline day in the
+// entry's timezone, default AoE (UTC-12)
+function tzOffset(tz) {
+  if (!tz || tz === 'AoE') return '-12:00'
+  if (tz === 'UTC') return '+00:00'
+  const m = /^UTC([+-])(\d{1,2})(?::(\d{2}))?$/.exec(tz)
+  if (m) return `${m[1]}${m[2].padStart(2, '0')}:${m[3] ?? '00'}`
+  return '-12:00'
+}
+
 function statusOf(days, nextCycleExpected) {
   if (days < 0) {
     if (nextCycleExpected && nextCycleExpected >= new Date().toISOString().slice(0, 7)) return 'TBA'
@@ -142,7 +152,7 @@ function tileMarkup(conf, countdown, status) {
                 props: {
                   style: { display: 'flex', flexDirection: 'column', ...mono, fontSize: 26 },
                   children: [
-                    { type: 'span', props: { children: `DEADLINE ${conf.deadline}` } },
+                    { type: 'span', props: { children: `DEADLINE ${conf.deadline.slice(0, 10)}` } },
                     { type: 'span', props: { style: { opacity: 0.6, fontSize: 20, marginTop: 8 }, children: 'WHATNEXT — CONFERENCE DEADLINES' } },
                   ],
                 },
@@ -176,7 +186,9 @@ async function main() {
   mkdirSync(outDir, { recursive: true })
 
   for (const conf of conferences) {
-    const days = Math.ceil((Date.parse(conf.deadline + 'T23:59:59Z') - Date.now()) / 86_400_000)
+    const stamp = conf.deadline.includes('T') ? conf.deadline : `${conf.deadline}T23:59:59`
+    const msLeft = Date.parse(`${stamp}${tzOffset(conf.tz)}`) - Date.now()
+    const days = msLeft >= 0 ? Math.ceil(msLeft / 86_400_000) : Math.floor(msLeft / 86_400_000)
     const status = statusOf(days, conf.nextCycleExpected)
     const countdown = countdownText(days, status, conf.nextCycleExpected)
     const svg = await satori(tileMarkup(conf, countdown, status), { width: 1200, height: 630, fonts })

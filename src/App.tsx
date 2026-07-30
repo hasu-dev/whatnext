@@ -127,7 +127,7 @@ export default function App() {
       if (favesOnly && !favorites.has(c.id)) return false
       if (activeFields.size > 0 && !activeFields.has(c.field)) return false
       if (horizon !== null) {
-        const days = daysUntil(c.deadline)
+        const days = daysUntil(c.deadline, c.tz)
         if (days < 0 || days > horizon) return false
       }
       return matchesQuery(c, parsed)

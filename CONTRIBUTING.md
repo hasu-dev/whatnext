@@ -33,11 +33,11 @@ when a PR is merged.
    | `year` | Edition year of the conference (not the deadline year) | `2027` |
    | `field` | Uppercase primary classification (single value) — reuse one if it fits | `NLP` |
    | `tags` | Optional, max 8, lowercase-hyphen slugs from [`data/tags.json`](data/tags.json) | `["nlp", "llm"]` |
-   | `deadline` | Paper submission deadline, `YYYY-MM-DD` | `2026-12-15` |
-   | `abstractDeadline` | Optional earlier abstract deadline | `2026-12-08` |
+   | `deadline` | Paper cutoff, `YYYY-MM-DDTHH:MM:SS` in the entry's `tz`; use `T23:59:59` for end-of-day deadlines | `2026-12-15T23:59:59` |
+   | `abstractDeadline` | Optional earlier abstract cutoff, same format | `2026-12-08T23:59:59` |
    | `deadlineNote` | Optional qualifier shown under the deadline | `Cycle 1` |
    | `nextCycleExpected` | Optional `YYYY-MM` of an announced next cycle whose date isn't published — renders the entry as TBA instead of CLOSED | `2027-02` |
-   | `tz` | Optional timezone; omit for AoE | `AoE` |
+   | `tz` | Optional: `AoE` (default), `UTC`, or fixed offset like `UTC+8`; the deadline timestamp is interpreted in this zone. DST zones: use the offset in effect on the date | `UTC-5` |
    | `location` | `City, Country` | `Vancouver, Canada` |
    | `website` | Official site, `https://` only | `https://naacl.org` |
    | `weight` | Cold-start prior for tile size, 1–25 (see guide below) | `9` |

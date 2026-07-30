@@ -26,7 +26,7 @@ interface Props {
 }
 
 export function Timeline({ conferences, horizon, onHorizon }: Props) {
-  const allDays = conferences.map((c) => daysUntil(c.deadline))
+  const allDays = conferences.map((c) => daysUntil(c.deadline, c.tz))
   const segments = ANCHORS.slice(1).map((b, i) => {
     const a = ANCHORS[i]
     const lo = a.days ?? 0
