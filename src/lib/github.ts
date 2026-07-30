@@ -2,7 +2,7 @@ import type { Conference } from '../types'
 
 // Repo that hosts the community dataset. All maintenance flows are plain
 // prefilled GitHub URLs — no server-side proxy ever holds a token.
-export const GITHUB_REPO = 'https://github.com/hasu-ai/whatnext'
+export const GITHUB_REPO = 'https://github.com/hasu-dev/whatnext'
 export const GITHUB_BRANCH = 'main'
 
 /** Prefilled issue for reporting a wrong/extended deadline or bad data. */
