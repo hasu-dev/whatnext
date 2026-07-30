@@ -1,0 +1,12 @@
+{
+  "id": "aistats",
+  "name": "AISTATS",
+  "fullName": "International Conference on Artificial Intelligence and Statistics",
+  "year": 2027,
+  "field": "LEARNING",
+  "deadline": "2026-10-02",
+  "location": "Naha, Japan",
+  "website": "https://aistats.org",
+  "weight": 7,
+  "featured": false
+}

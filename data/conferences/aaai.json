@@ -1,0 +1,12 @@
+{
+  "id": "aaai",
+  "name": "AAAI",
+  "fullName": "AAAI Conference on Artificial Intelligence",
+  "year": 2027,
+  "field": "AI",
+  "deadline": "2026-08-05",
+  "location": "Singapore",
+  "website": "https://aaai.org",
+  "weight": 14,
+  "featured": false
+}

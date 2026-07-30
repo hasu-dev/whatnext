@@ -1,0 +1,12 @@
+{
+  "id": "pldi",
+  "name": "PLDI",
+  "fullName": "Programming Language Design and Implementation",
+  "year": 2027,
+  "field": "PL",
+  "deadline": "2026-11-10",
+  "location": "Boston, USA",
+  "website": "https://pldi.org",
+  "weight": 6,
+  "featured": false
+}

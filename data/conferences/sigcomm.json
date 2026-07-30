@@ -1,0 +1,12 @@
+{
+  "id": "sigcomm",
+  "name": "SIGCOMM",
+  "fullName": "ACM Special Interest Group on Data Communication",
+  "year": 2027,
+  "field": "SYSTEMS",
+  "deadline": "2027-01-30",
+  "location": "Porto, Portugal",
+  "website": "https://sigcomm.org",
+  "weight": 7,
+  "featured": false
+}

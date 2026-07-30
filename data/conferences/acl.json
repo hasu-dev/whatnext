@@ -1,0 +1,12 @@
+{
+  "id": "acl",
+  "name": "ACL",
+  "fullName": "Annual Meeting of the Association for Computational Linguistics",
+  "year": 2027,
+  "field": "NLP",
+  "deadline": "2027-02-15",
+  "location": "Prague, Czechia",
+  "website": "https://www.aclweb.org",
+  "weight": 12,
+  "featured": false
+}

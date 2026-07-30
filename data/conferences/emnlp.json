@@ -1,0 +1,12 @@
+{
+  "id": "emnlp",
+  "name": "EMNLP",
+  "fullName": "Empirical Methods in Natural Language Processing",
+  "year": 2026,
+  "field": "NLP",
+  "deadline": "2026-05-19",
+  "location": "Budapest, Hungary",
+  "website": "https://2026.emnlp.org",
+  "weight": 12,
+  "featured": true
+}

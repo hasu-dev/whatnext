@@ -1,0 +1,6 @@
+node_modules
+dist
+*.tsbuildinfo
+worker/seed.sql
+.DS_Store
+*.local

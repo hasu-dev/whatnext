@@ -1,0 +1,12 @@
+{
+  "id": "uist",
+  "name": "UIST",
+  "fullName": "ACM Symposium on User Interface Software and Technology",
+  "year": 2027,
+  "field": "HCI",
+  "deadline": "2026-08-12",
+  "location": "Berlin, Germany",
+  "website": "https://uist.acm.org",
+  "weight": 6,
+  "featured": false
+}

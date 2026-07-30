@@ -1,0 +1,12 @@
+{
+  "id": "confname",
+  "name": "CONFNAME",
+  "fullName": "Full Official Conference Name",
+  "year": 2027,
+  "field": "AI",
+  "deadline": "2026-12-31",
+  "location": "City, Country",
+  "website": "https://example.org",
+  "weight": 8,
+  "featured": false
+}

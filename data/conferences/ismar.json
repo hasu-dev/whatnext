@@ -1,0 +1,12 @@
+{
+  "id": "ismar",
+  "name": "ISMAR",
+  "fullName": "International Symposium on Mixed and Augmented Reality",
+  "year": 2026,
+  "field": "XR",
+  "deadline": "2026-08-19",
+  "location": "Taipei, Taiwan",
+  "website": "https://ismar.net",
+  "weight": 5,
+  "featured": false
+}

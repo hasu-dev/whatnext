@@ -1,0 +1,12 @@
+{
+  "id": "eccv",
+  "name": "ECCV",
+  "fullName": "European Conference on Computer Vision",
+  "year": 2026,
+  "field": "VISION",
+  "deadline": "2026-03-06",
+  "location": "Malmö, Sweden",
+  "website": "https://eccv.ecva.net",
+  "weight": 10,
+  "featured": false
+}

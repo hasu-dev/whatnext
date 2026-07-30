@@ -1,0 +1,12 @@
+{
+  "id": "siggraph",
+  "name": "SIGGRAPH",
+  "fullName": "Special Interest Group on Computer Graphics",
+  "year": 2027,
+  "field": "GRAPHICS",
+  "deadline": "2027-01-22",
+  "location": "Los Angeles, USA",
+  "website": "https://www.siggraph.org",
+  "weight": 14,
+  "featured": false
+}

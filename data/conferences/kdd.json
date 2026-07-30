@@ -1,0 +1,12 @@
+{
+  "id": "kdd",
+  "name": "KDD",
+  "fullName": "Knowledge Discovery and Data Mining",
+  "year": 2027,
+  "field": "DATA",
+  "deadline": "2026-08-08",
+  "location": "Jeju, Korea",
+  "website": "https://kdd.org",
+  "weight": 10,
+  "featured": true
+}

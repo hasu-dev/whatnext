@@ -1,0 +1,12 @@
+{
+  "id": "neurips",
+  "name": "NEURIPS",
+  "fullName": "Conference on Neural Information Processing Systems",
+  "year": 2026,
+  "field": "AI/ML",
+  "deadline": "2026-05-15",
+  "location": "San Diego, USA",
+  "website": "https://neurips.cc",
+  "weight": 22,
+  "featured": true
+}

@@ -1,0 +1,12 @@
+{
+  "id": "chi",
+  "name": "CHI",
+  "fullName": "Conference on Human Factors in Computing Systems",
+  "year": 2027,
+  "field": "HCI",
+  "deadline": "2026-09-11",
+  "location": "Amsterdam, NL",
+  "website": "https://chi2027.acm.org",
+  "weight": 12,
+  "featured": false
+}

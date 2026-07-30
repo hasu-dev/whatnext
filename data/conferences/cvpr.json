@@ -1,0 +1,12 @@
+{
+  "id": "cvpr",
+  "name": "CVPR",
+  "fullName": "Conference on Computer Vision and Pattern Recognition",
+  "year": 2027,
+  "field": "VISION",
+  "deadline": "2026-11-13",
+  "location": "Denver, USA",
+  "website": "https://cvpr.thecvf.com",
+  "weight": 18,
+  "featured": false
+}

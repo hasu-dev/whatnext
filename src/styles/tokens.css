@@ -1,0 +1,82 @@
+/* ---------- Design tokens: two themes, one structure ---------- */
+
+:root[data-theme='archive'] {
+  --bg: #efeade;
+  --surface: #f2eee4;
+  --ink: #1d232e;
+  --muted: #8d8878;
+  --accent: #2c3ee0;
+  --accent-ink: #f2eee4;
+  --line: rgba(44, 62, 224, 0.55);
+  --line-strong: #2c3ee0;
+  --tile-bg: #f2eee4;
+  --tile-ink: #2c3ee0;
+  --tile-meta: rgba(44, 62, 224, 0.75);
+  /* status-driven fills: URGENT = solid accent, APPROACHING = scan lines */
+  --tile-urgent-bg: #2c3ee0;
+  --tile-urgent-ink: #f2eee4;
+  --tile-approaching-bg:
+    repeating-linear-gradient(
+      45deg,
+      rgba(44, 62, 224, 0.14) 0,
+      rgba(44, 62, 224, 0.14) 1px,
+      transparent 1px,
+      transparent 5px
+    )
+    #f2eee4;
+  --tile-approaching-ink: #2c3ee0;
+  --tile-closed-ink: rgba(29, 35, 46, 0.28);
+  --tile-closed-line: rgba(29, 35, 46, 0.18);
+  --font-display: 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-meta: 'SF Mono', 'IBM Plex Mono', Menlo, Consolas, monospace;
+  --display-weight: 500;
+  --display-tracking: 0.01em;
+  --tile-radius: 0;
+  /* archive: each tile draws its own hairline border, tiles sit 6px apart */
+  --tile-border-w: 1px;
+  --map-bg: transparent;
+  --map-frame: none;
+  --gap: 6px;
+}
+
+:root[data-theme='mono'] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --ink: #0a0a0a;
+  --muted: #9c9c9c;
+  --accent: #0a0a0a;
+  --accent-ink: #ffffff;
+  --line: #0a0a0a;
+  --line-strong: #0a0a0a;
+  --tile-bg: #ffffff;
+  --tile-ink: #0a0a0a;
+  --tile-meta: #4c4c4c;
+  /* status-driven fills: URGENT = solid black, APPROACHING = scan lines */
+  --tile-urgent-bg: #0a0a0a;
+  --tile-urgent-ink: #ffffff;
+  --tile-approaching-bg:
+    repeating-linear-gradient(
+      45deg,
+      rgba(10, 10, 10, 0.16) 0,
+      rgba(10, 10, 10, 0.16) 1px,
+      transparent 1px,
+      transparent 5px
+    )
+    #ffffff;
+  --tile-approaching-ink: #0a0a0a;
+  --tile-closed-ink: #c3c3c3;
+  --tile-closed-line: #dedede;
+  --font-display:
+    'Helvetica Neue', Helvetica, 'Arial Black', Arial, system-ui, sans-serif;
+  --font-meta: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  --display-weight: 700;
+  --display-tracking: -0.02em;
+  --tile-radius: 0;
+  /* mono: tiles are borderless; a 1px gap over the black map background
+     draws every divider exactly once, so adjacent tiles never stack
+     borders into 2px lines */
+  --tile-border-w: 0px;
+  --map-bg: #0a0a0a;
+  --map-frame: 1px solid #0a0a0a;
+  --gap: 1px;
+}
