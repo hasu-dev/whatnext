@@ -75,8 +75,15 @@ export default function App() {
         // zen mode: nothing but the map
         e.preventDefault()
         setZen((z) => !z)
-      } else if (e.key === '?' && document.activeElement?.tagName !== 'INPUT') {
-        // deliberately not ⌘H — that's the macOS hide-window shortcut
+      } else if (
+        e.key.toLowerCase() === 'h' &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        document.activeElement?.tagName !== 'INPUT'
+      ) {
+        // plain H — not ⌘H (macOS hide-window), and on a different
+        // physical key than "/" so it can't be mistyped as search
         e.preventDefault()
         setHelpOpen((v) => !v)
       } else if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {

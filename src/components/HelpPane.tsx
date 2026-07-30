@@ -7,7 +7,7 @@ interface Props {
 const SHORTCUTS: Array<[string, string]> = [
   ['/', 'Focus the search box'],
   ['⌘K / Ctrl+K', 'Zen mode — hide everything but the map'],
-  ['?', 'Toggle this help pane'],
+  ['H', 'Toggle this help pane'],
   ['Esc', 'Close panels, deselect, exit zen'],
   ['Enter on a tile', 'Expand it in place'],
 ]
