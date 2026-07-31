@@ -16,6 +16,7 @@ import {
 import { reportIssueUrl } from '../lib/github'
 import { downloadICS } from '../lib/ics'
 import { reportEvent } from '../lib/events'
+import { shareConference } from '../lib/share'
 
 interface Props {
   rect: TileRect
@@ -38,12 +39,13 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   const status = statusOf(days, conf.nextCycleExpected)
   const area = w * h
 
-  const copyShareLink = () => {
-    const url = `${location.origin}/s/${conf.id}`
-    navigator.clipboard?.writeText(url).catch(() => {})
-    reportEvent('share', conf.id)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1600)
+  const share = async () => {
+    // native share sheet on touch devices, clipboard elsewhere
+    const result = await shareConference(conf)
+    if (result === 'copied') {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1600)
+    }
   }
 
   const tiny = area < 16_000 || h < 84
@@ -317,7 +319,7 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
                 className="tile__action"
                 onClick={(e) => {
                   e.stopPropagation()
-                  copyShareLink()
+                  void share()
                 }}
               >
                 <Link2 size={11} strokeWidth={1.75} /> {copied ? 'COPIED' : 'SHARE'}
