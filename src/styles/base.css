@@ -160,6 +160,20 @@ button {
   color: var(--accent-ink);
 }
 
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  padding: 6px;
+  color: var(--ink);
+}
+
+.mode-toggle:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
 /* ---------- Filter chips ---------- */
 
 .filters {
@@ -418,7 +432,7 @@ button {
 
 .tile__tag {
   font-family: var(--font-meta);
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: 0.05em;
   padding: 0;
   color: inherit;
@@ -446,7 +460,7 @@ button {
   align-items: center;
   gap: 7px;
   font-family: var(--font-meta);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   padding: 8px 16px;
   border: 1px solid currentColor;
@@ -542,14 +556,14 @@ button {
 /* expanded detail block inside a selected tile */
 .tile__detail {
   font-family: var(--font-meta);
-  font-size: 11px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.6;
   letter-spacing: 0.05em;
   max-width: 46ch;
 }
 
 .tile__detail dt {
-  font-size: 9px;
+  font-size: 10.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   opacity: 0.6;

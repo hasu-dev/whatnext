@@ -1,5 +1,5 @@
 import type { Conference } from '../types'
-import { deadlineDate } from './status'
+import { daysUntil, deadlineDate, formatExpectedMonth, isEstimatedDeadline, statusOf } from './status'
 import { reportEvent } from './events'
 
 /**
@@ -12,11 +12,20 @@ export async function shareConference(conf: Conference): Promise<'shared' | 'cop
   const url = `${location.origin}/s/${conf.id}`
   const nativeCapable = typeof navigator.share === 'function' && matchMedia('(pointer: coarse)').matches
 
+  // the shared text must not present a passed deadline as live
+  const status = statusOf(daysUntil(conf.deadline, conf.tz), conf.nextCycleExpected)
+  const text =
+    status === 'TBA' && conf.nextCycleExpected
+      ? `${conf.fullName} — next cycle expected ${formatExpectedMonth(conf.nextCycleExpected, true)}, date TBA`
+      : isEstimatedDeadline(conf.deadline)
+        ? `${conf.fullName} — deadline expected ~${formatExpectedMonth(conf.deadline, true)} (estimated)`
+        : `${conf.fullName} — deadline ${deadlineDate(conf.deadline)}${status === 'CLOSED' ? ' (closed)' : ''}`
+
   if (nativeCapable) {
     try {
       await navigator.share({
         title: `${conf.name} ${conf.year}`,
-        text: `${conf.fullName} — deadline ${deadlineDate(conf.deadline)}`,
+        text,
         url,
       })
       reportEvent('share', conf.id)

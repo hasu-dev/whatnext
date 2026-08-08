@@ -2,6 +2,12 @@ import { useMemo } from 'react'
 import { hierarchy, treemap, treemapSquarify } from 'd3-hierarchy'
 import type { Attention, Conference, TileRect } from '../types'
 import { daysUntil, statusOf } from '../lib/status'
+import {
+  DETAIL_FRESHNESS_NEED,
+  detailCoreNeed,
+  detailFullNameNeed,
+  detailTagsNeed,
+} from '../lib/detailBudget'
 
 interface Args {
   conferences: Conference[]
@@ -110,22 +116,18 @@ export function mobileColumnLayout(
 
 /**
  * Rough pixel height the expanded detail needs for THIS conference —
- * header + name + every detail row it will actually render. The boost
- * loop steers the selected tile's height toward this, so the card tends
- * to fit its content: not clipped, not cavernous.
+ * header + name + every detail row it will actually render, using the
+ * same row constants Tile.tsx gates its progressive disclosure on
+ * (lib/detailBudget). The boost loop steers the selected tile's height
+ * toward this, so the card tends to fit its content: not clipped, not
+ * cavernous.
  */
 export function estimateDetailHeight(conf: Conference): number {
   let px = 24 /* padding */ + 26 /* header row */ + 66 /* name */ + 8
-  px += 20 + Math.ceil(conf.fullName.length / 38) * 19 // full name
-  px += 39 // venue
-  if (conf.abstractDeadline) px += 39
-  px += 57 // deadline incl. local-time/countdown line
-  if (conf.deadlineNote) px += 18
-  if (conf.website) px += 39
-  const tagCount = conf.tags?.length ?? 0
-  if (tagCount > 0) px += 20 + Math.ceil(tagCount / 3) * 24 // text-style tag rows
-  px += 24 + 16 + 34 // actions row incl. rule + air above it
-  px += 16 + 14 // freshness
+  px += detailFullNameNeed(conf.fullName.length)
+  px += detailCoreNeed(conf)
+  px += detailTagsNeed(conf.tags?.length ?? 0)
+  px += DETAIL_FRESHNESS_NEED
   return Math.round(px * 1.08) // small safety margin
 }
 

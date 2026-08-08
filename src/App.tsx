@@ -9,7 +9,16 @@ import { mobileColumnLayout, useTreemap } from './hooks/useTreemap'
 import { useAttention } from './hooks/useAttention'
 import { useIsMobile } from './hooks/useIsMobile'
 import { loadConferences } from './data/loader'
-import { daysUntil, deadlineDate, formatCountdown, statusOf } from './lib/status'
+import { usePersistedValue } from './hooks/usePersistedValue'
+import {
+  daysUntil,
+  deadlineDate,
+  formatCountdown,
+  formatExpectedMonth,
+  isEstimatedDeadline,
+  statusOf,
+} from './lib/status'
+import { syncMetaThemeColor } from './lib/theme'
 import type { TileRect } from './types'
 import { matchesQuery, parseQuery } from './lib/search'
 import { reportEvent, reportSearchMiss } from './lib/events'
@@ -54,8 +63,8 @@ function usePersistedSet(key: string, validValues: string[]): [Set<string>, (id:
 }
 
 export default function App() {
-  const [theme, setTheme] = useState<ThemeName>(
-    () => (localStorage.getItem('theme') as ThemeName) ?? 'archive',
+  const [theme, setTheme] = usePersistedValue<ThemeName>('theme', (stored) =>
+    stored === 'mono' ? 'mono' : 'archive',
   )
   const [query, setQuery] = useState('')
   const [activeFields, toggleField] = usePersistedSet('fields', FIELDS)
@@ -79,7 +88,7 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
-    localStorage.setItem('theme', theme)
+    syncMetaThemeColor()
   }, [theme])
 
   useEffect(() => {
@@ -308,10 +317,19 @@ export default function App() {
                 </div>
                 <div className="peek__meta">
                   <span>
-                    {peek.conf.field} · {deadlineDate(peek.conf.deadline)}
+                    {peek.conf.field} · {isEstimatedDeadline(peek.conf.deadline) && '~'}
+                    {deadlineDate(peek.conf.deadline)}
                   </span>
                   <span>
-                    {status === 'CLOSED' ? 'closed' : formatCountdown(days)} · click to expand
+                    {/* TBA: expected month instead of stale negative days, same as the tile */}
+                    {status === 'CLOSED'
+                      ? 'closed'
+                      : status === 'TBA' && peek.conf.nextCycleExpected
+                        ? formatExpectedMonth(peek.conf.nextCycleExpected)
+                        : isEstimatedDeadline(peek.conf.deadline)
+                          ? `~${formatExpectedMonth(peek.conf.deadline)}`
+                          : formatCountdown(days)}{' '}
+                    · click to expand
                   </span>
                 </div>
               </div>

@@ -5,6 +5,8 @@ import type { Conference } from '../types'
 //   plain text  — fuzzy substring over name / fullName / field / tags
 //   #tag        — exact tag match
 //   field:xxx   — restrict to the field facet
+//   "..."       — double quotes keep a multi-word value together
+//                 (field:"health info", "health info")
 //   -xxx / NOT  — exclude
 //   AND / OR    — uppercase operators; whitespace defaults to AND
 // Deliberately no parentheses, nesting, or precedence.
@@ -32,7 +34,10 @@ export function parseQuery(raw: string): ParsedQuery {
   let orPending = false
   let notPending = false
 
-  for (const token of raw.trim().split(/\s+/)) {
+  // whitespace splits terms; a double-quoted stretch stays one term so
+  // multi-word values ("HEALTH INFO") survive tokenization
+  for (const rawToken of raw.trim().match(/[^\s"]*"[^"]*"?|\S+/g) ?? []) {
+    const token = rawToken.replaceAll('"', '')
     if (!token) continue
     if (token === 'AND') continue // whitespace already means AND
     if (token === 'OR') {

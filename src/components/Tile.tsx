@@ -10,9 +10,16 @@ import {
   formatExpectedMonth,
   formatLocalCutoff,
   formatRemaining,
+  isEstimatedDeadline,
   statusOf,
   tzLabel,
 } from '../lib/status'
+import {
+  DETAIL_FRESHNESS_NEED,
+  detailCoreNeed,
+  detailFullNameNeed,
+  detailTagsNeed,
+} from '../lib/detailBudget'
 import { reportIssueUrl } from '../lib/github'
 import { downloadICS } from '../lib/ics'
 import { reportEvent } from '../lib/events'
@@ -95,34 +102,36 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
   // Requirements are computed from THIS conference's actual rows (abstract
   // deadline, notes, tag count, name length), cumulatively by priority:
   // core (venue/deadline/website/actions) → tags → full name → freshness.
+  // Row heights live in lib/detailBudget, shared with the treemap's
+  // selected-tile sizing (estimateDetailHeight) so the two can't drift.
   const detailBudget = h - 24 - 26 - nameSize * 1.1
   const tagCount = conf.tags?.length ?? 0
-  const coreNeed =
-    39 + // venue
-    (conf.abstractDeadline ? 39 : 0) +
-    57 + // deadline incl. local-time line
-    (conf.deadlineNote ? 18 : 0) +
-    (conf.nextCycleExpected ? 18 : 0) +
-    (conf.website ? 39 : 0) +
-    84 // actions row incl. rule + margins
-  const tagsNeed = tagCount > 0 ? 20 + Math.ceil(tagCount / 3) * 26 : 0
-  const fullNameNeed = 20 + Math.ceil(conf.fullName.length / 38) * 19
+  const coreNeed = detailCoreNeed(conf)
+  const tagsNeed = detailTagsNeed(tagCount)
+  const fullNameNeed = detailFullNameNeed(conf.fullName.length)
   const showDetail = selected && large && detailBudget >= coreNeed
   const showDetailTags = tagCount > 0 && detailBudget >= coreNeed + tagsNeed
   const showDetailFullName = detailBudget >= coreNeed + tagsNeed + fullNameNeed
-  const showDetailFreshness = detailBudget >= coreNeed + tagsNeed + fullNameNeed + 30
+  const showDetailFreshness = detailBudget >= coreNeed + tagsNeed + fullNameNeed + DETAIL_FRESHNESS_NEED
 
   // bottom row: date is fixed, the countdown shrinks into the leftover
   // width and disappears entirely rather than clipping
   const metaSize = w < 100 ? 8 : narrow ? 9 : 11
-  const shortDate = deadlineDate(conf.deadline)
+  const estimated = isEstimatedDeadline(conf.deadline)
+  const rawDate = deadlineDate(conf.deadline)
+  // estimated (YYYY-MM) deadlines carry a ~ everywhere so a projection
+  // never reads as a confirmed date
+  const shortDate = estimated ? `~${rawDate}` : rawDate
   const dateW = shortDate.length * metaSize * 0.68
-  // TBA tiles show the expected month of the announced next cycle where
-  // the countdown would otherwise show stale negative days
+  // TBA tiles show the expected month of the announced next cycle, and
+  // estimated deadlines their expected month, where the countdown would
+  // otherwise show stale or fake-precise day counts
   const countdown =
     status === 'TBA' && conf.nextCycleExpected
       ? formatExpectedMonth(conf.nextCycleExpected)
-      : formatCountdown(days)
+      : estimated
+        ? `~${formatExpectedMonth(conf.deadline)}`
+        : formatCountdown(days)
   const cdBase = narrow ? 13 : small ? 16 : Math.max(18, Math.min(w * 0.2, h * 0.3, 64))
   const countdownSize = Math.min(cdBase, (avail - dateW - 10) / (countdown.length * 0.62))
   const showCountdown = !tiny && countdownSize >= 10
@@ -155,7 +164,15 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
-      aria-label={`${conf.name} ${conf.year}, deadline ${shortDate}`}
+      aria-label={`${conf.name} ${conf.year}, ${
+        // spoken label must not present a passed deadline as live — mirror
+        // what sighted users get from the status badge and countdown
+        status === 'TBA' && conf.nextCycleExpected
+          ? `deadline TBA, next cycle expected ${formatExpectedMonth(conf.nextCycleExpected, true)}`
+          : estimated
+            ? `deadline estimated ${formatExpectedMonth(conf.deadline, true)}`
+            : `deadline ${rawDate}${status === 'CLOSED' ? ', closed' : ''}`
+      }`}
     >
       {micro ? (
         !labelless && (
@@ -258,11 +275,19 @@ export function Tile({ rect, selected, faved, trending, onSelect, onFave, onTagC
             )}
             <dt>Submission deadline</dt>
             <dd>
-              {conf.deadline.replace('T', ' ')} {tzLabel(conf.tz)}
-              <div style={{ opacity: 0.65 }}>
-                Your time: {formatLocalCutoff(deadlineCutoffMs(conf.deadline, conf.tz))} ·{' '}
-                {formatRemaining(deadlineCutoffMs(conf.deadline, conf.tz) - Date.now())}
-              </div>
+              {estimated ? (
+                // a month estimate gets no tz or local-time line — that
+                // precision doesn't exist yet
+                <>~{formatExpectedMonth(conf.deadline, true)} — estimated, exact date TBA</>
+              ) : (
+                <>
+                  {conf.deadline.replace('T', ' ')} {tzLabel(conf.tz)}
+                  <div style={{ opacity: 0.65 }}>
+                    Your time: {formatLocalCutoff(deadlineCutoffMs(conf.deadline, conf.tz))} ·{' '}
+                    {formatRemaining(deadlineCutoffMs(conf.deadline, conf.tz) - Date.now())}
+                  </div>
+                </>
+              )}
               {conf.deadlineNote && <div style={{ opacity: 0.65 }}>{conf.deadlineNote}</div>}
               {status === 'TBA' && conf.nextCycleExpected && (
                 <div style={{ opacity: 0.65 }}>

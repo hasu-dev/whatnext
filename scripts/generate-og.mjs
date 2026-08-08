@@ -69,11 +69,20 @@ function statusOf(days, nextCycleExpected) {
   return 'FAR'
 }
 
+/** "2027-01" → "Jan '27" */
+function monthShort(ym) {
+  const [y, m] = ym.split('-')
+  return `${MONTHS[Number(m) - 1] ?? m} '${y.slice(-2)}`
+}
+
+/** "2027-01" → "2027-01-31" — cutoff math for estimated (YYYY-MM) deadlines */
+function endOfMonth(ym) {
+  const [y, m] = ym.split('-').map(Number)
+  return `${ym}-${new Date(Date.UTC(y, m, 0)).getUTCDate()}`
+}
+
 function countdownText(days, status, nextCycleExpected) {
-  if (status === 'TBA' && nextCycleExpected) {
-    const [y, m] = nextCycleExpected.split('-')
-    return `${MONTHS[Number(m) - 1] ?? m} '${y.slice(-2)}`
-  }
+  if (status === 'TBA' && nextCycleExpected) return monthShort(nextCycleExpected)
   return `${days}d`
 }
 
@@ -152,7 +161,7 @@ function tileMarkup(conf, countdown, status) {
                 props: {
                   style: { display: 'flex', flexDirection: 'column', ...mono, fontSize: 26 },
                   children: [
-                    { type: 'span', props: { children: `DEADLINE ${conf.deadline.slice(0, 10)}` } },
+                    { type: 'span', props: { children: `DEADLINE ${conf.deadline.length === 7 ? `~${conf.deadline}` : conf.deadline.slice(0, 10)}` } },
                     { type: 'span', props: { style: { opacity: 0.6, fontSize: 20, marginTop: 8 }, children: 'WHATNEXT — CONFERENCE DEADLINES' } },
                   ],
                 },
@@ -186,11 +195,14 @@ async function main() {
   mkdirSync(outDir, { recursive: true })
 
   for (const conf of conferences) {
-    const stamp = conf.deadline.includes('T') ? conf.deadline : `${conf.deadline}T23:59:59`
+    // a bare YYYY-MM deadline is an estimated month (mirrors src/lib/status.ts)
+    const estimated = conf.deadline.length === 7
+    const withDay = estimated ? endOfMonth(conf.deadline) : conf.deadline
+    const stamp = withDay.includes('T') ? withDay : `${withDay}T23:59:59`
     const msLeft = Date.parse(`${stamp}${tzOffset(conf.tz)}`) - Date.now()
     const days = msLeft >= 0 ? Math.ceil(msLeft / 86_400_000) : Math.floor(msLeft / 86_400_000)
     const status = statusOf(days, conf.nextCycleExpected)
-    const countdown = countdownText(days, status, conf.nextCycleExpected)
+    const countdown = estimated ? `~${monthShort(conf.deadline)}` : countdownText(days, status, conf.nextCycleExpected)
     const svg = await satori(tileMarkup(conf, countdown, status), { width: 1200, height: 630, fonts })
     const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng()
     writeFileSync(join(outDir, `${conf.id}.png`), png)

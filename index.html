@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#2c3ee0" />
+    <script>
+      // pre-paint: stamp the persisted theme + mode (mode falls back to
+      // the OS scheme) before any style applies, so returning users never
+      // flash the default light archive look. Mirrors usePersistedValue's
+      // keys and TopBar's fallback — keep the three in sync.
+      try {
+        var t = localStorage.getItem('theme')
+        if (t === 'archive' || t === 'mono') document.documentElement.dataset.theme = t
+        var m = localStorage.getItem('mode')
+        if (m !== 'dark' && m !== 'light')
+          m = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.dataset.mode = m
+      } catch (e) {}
+    </script>
     <title>what-next.app — conference heat map</title>
   </head>
   <body>

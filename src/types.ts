@@ -7,7 +7,7 @@ export interface Conference {
   year: number
   field: string // single-value primary classification
   tags?: string[] // controlled vocabulary slugs, see data/tags.json
-  deadline: string // ISO date of paper submission deadline
+  deadline: string // full local timestamp, or bare YYYY-MM for an estimated month
   abstractDeadline?: string
   deadlineNote?: string // e.g. which submission cycle the deadline refers to
   nextCycleExpected?: string // YYYY-MM of an announced-but-undated next cycle
