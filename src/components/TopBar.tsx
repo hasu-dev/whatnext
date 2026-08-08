@@ -1,5 +1,7 @@
-import { forwardRef } from 'react'
-import { Search } from 'lucide-react'
+import { forwardRef, useEffect } from 'react'
+import { Moon, Search, Sun } from 'lucide-react'
+import { usePersistedValue } from '../hooks/usePersistedValue'
+import { syncMetaThemeColor } from '../lib/theme'
 
 export type ThemeName = 'archive' | 'mono'
 
@@ -14,6 +16,23 @@ export const TopBar = forwardRef<HTMLInputElement, Props>(function TopBar(
   { query, onQuery, theme, onTheme },
   inputRef,
 ) {
+  // mode lives here, not in App: its only consumers are this button and
+  // the <html> attribute, so toggling never re-renders the tile tree.
+  // First visit follows the OS scheme; the pre-paint script in index.html
+  // applies the same value before React mounts.
+  const [mode, setMode] = usePersistedValue<'dark' | 'light'>('mode', (stored) =>
+    stored === 'dark' || stored === 'light'
+      ? stored
+      : matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light',
+  )
+  useEffect(() => {
+    document.documentElement.dataset.mode = mode
+    syncMetaThemeColor()
+  }, [mode])
+  const dark = mode === 'dark'
+
   return (
     <header className="topbar">
       <div className="topbar__brand">
@@ -54,6 +73,15 @@ export const TopBar = forwardRef<HTMLInputElement, Props>(function TopBar(
             Mono
           </button>
         </div>
+        <button
+          className="mode-toggle"
+          onClick={() => setMode(dark ? 'light' : 'dark')}
+          aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-pressed={dark}
+          title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {dark ? <Sun size={13} strokeWidth={1.75} /> : <Moon size={13} strokeWidth={1.75} />}
+        </button>
       </div>
     </header>
   )

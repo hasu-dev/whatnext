@@ -22,8 +22,9 @@ GitHub — fixing a deadline is one click, adding a conference is one PR.
   - **Report** — prefilled GitHub issue for wrong/extended deadlines
 - **Search** (`/` to focus) understands a little syntax: plain text
   fuzzy-matches names and tags, `#llm` matches a tag exactly,
-  `field:vision` restricts a facet, `-workshop` or `NOT x` excludes,
-  `a OR b` alternates (space means AND).
+  `field:vision` restricts a facet, `field:"health info"` quotes values
+  with spaces, `-workshop` or `NOT x` excludes, `a OR b` alternates
+  (space means AND).
 - **Filter chips** — fields on the left, your **Starred** set and
   **Add conf** on the right. Stars live in your browser only.
 - **Timeline** (bottom) — click Week / Month / Quarter / Year to keep

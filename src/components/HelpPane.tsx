@@ -16,6 +16,7 @@ const SYNTAX: Array<[string, string]> = [
   ['neural', 'Fuzzy match on name, full name, field, and tags'],
   ['#llm', 'Exact tag match'],
   ['field:vision', 'Restrict to a field'],
+  ['field:"health info"', 'Field values with spaces (quotes)'],
   ['-workshop or NOT x', 'Exclude'],
   ['a OR b', 'Either term (space means AND)'],
 ]

@@ -13,6 +13,7 @@ const schema = JSON.parse(readFileSync(join(root, 'data', 'schema.json'), 'utf8'
 const tagVocab = new Set(JSON.parse(readFileSync(join(root, 'data', 'tags.json'), 'utf8')).tags)
 
 const errors = []
+const warnings = []
 const seenIds = new Set()
 
 const files = readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_'))
@@ -78,6 +79,28 @@ for (const file of files) {
       if (!tagVocab.has(t)) fail(`tag "${t}" is not in data/tags.json — extend the vocabulary in a separate PR first`)
     }
   }
+
+  // non-fatal: a closed-but-current edition is a valid live state (the
+  // map shows it struck through until the conference happens), but an
+  // edition whose year is behind the current year has concluded — archive
+  // it so the live map only carries current and upcoming editions
+  if (entry.year && !entry.archived && entry.year < new Date().getFullYear()) {
+    warnings.push(`${file}: the ${entry.year} edition is over — set "archived": true`)
+  }
+
+  // non-fatal: an estimated (YYYY-MM) deadline whose month has fully
+  // passed is stale — set the announced date or push the estimate forward
+  if (typeof entry.deadline === 'string' && entry.deadline.length === 7 && !entry.archived) {
+    const [y, m] = entry.deadline.split('-').map(Number)
+    if (Date.UTC(y, m, 1) < Date.now()) {
+      warnings.push(`${file}: estimated deadline month ${entry.deadline} has passed — set the announced date or update the estimate`)
+    }
+  }
+}
+
+if (warnings.length > 0) {
+  console.warn(`⚠ ${warnings.length} data warning${warnings.length > 1 ? 's' : ''} (non-fatal):`)
+  for (const w of warnings) console.warn(`  - ${w}`)
 }
 
 if (errors.length > 0) {

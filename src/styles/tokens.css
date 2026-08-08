@@ -1,6 +1,7 @@
 /* ---------- Design tokens: two themes, one structure ---------- */
 
 :root[data-theme='archive'] {
+  color-scheme: light;
   --bg: #efeade;
   --surface: #f2eee4;
   --ink: #1d232e;
@@ -40,6 +41,7 @@
 }
 
 :root[data-theme='mono'] {
+  color-scheme: light;
   --bg: #ffffff;
   --surface: #ffffff;
   --ink: #0a0a0a;
@@ -79,4 +81,74 @@
   --map-bg: #0a0a0a;
   --map-frame: 1px solid #0a0a0a;
   --gap: 1px;
+}
+
+/* ---------- Dark mode: an override layer per theme, not a third theme.
+   Structural tokens (fonts, radius, border width, gap) stay put — only
+   the color tokens flip. Selector specificity (two attributes beats one)
+   guarantees these win over the base theme block regardless of source
+   order. ---------- */
+
+:root[data-theme='archive'][data-mode='dark'] {
+  /* native scrollbars, spinners, and datalist popups follow the mode */
+  color-scheme: dark;
+  --bg: #1b1f2b;
+  --surface: #20242f;
+  --ink: #eee9da;
+  --muted: #7d7a6c;
+  --accent: #6b7cff;
+  --accent-ink: #1b1f2b;
+  --line: rgba(107, 124, 255, 0.55);
+  --line-strong: #6b7cff;
+  --tile-bg: #20242f;
+  --tile-ink: #6b7cff;
+  --tile-meta: rgba(107, 124, 255, 0.75);
+  --tile-urgent-bg: #6b7cff;
+  --tile-urgent-ink: #1b1f2b;
+  --tile-approaching-bg:
+    repeating-linear-gradient(
+      45deg,
+      rgba(107, 124, 255, 0.18) 0,
+      rgba(107, 124, 255, 0.18) 1px,
+      transparent 1px,
+      transparent 5px
+    )
+    #20242f;
+  --tile-approaching-ink: #6b7cff;
+  --tile-closed-ink: rgba(238, 233, 218, 0.28);
+  --tile-closed-line: rgba(238, 233, 218, 0.18);
+}
+
+:root[data-theme='mono'][data-mode='dark'] {
+  color-scheme: dark;
+  --bg: #0a0a0a;
+  --surface: #0a0a0a;
+  --ink: #f0f0f0;
+  --muted: #6b6b6b;
+  --accent: #f0f0f0;
+  --accent-ink: #0a0a0a;
+  --line: #f0f0f0;
+  --line-strong: #f0f0f0;
+  --tile-bg: #0a0a0a;
+  --tile-ink: #f0f0f0;
+  --tile-meta: #a0a0a0;
+  --tile-urgent-bg: #f0f0f0;
+  --tile-urgent-ink: #0a0a0a;
+  --tile-approaching-bg:
+    repeating-linear-gradient(
+      45deg,
+      rgba(240, 240, 240, 0.16) 0,
+      rgba(240, 240, 240, 0.16) 1px,
+      transparent 1px,
+      transparent 5px
+    )
+    #0a0a0a;
+  --tile-approaching-ink: #f0f0f0;
+  --tile-closed-ink: #3d3d3d;
+  --tile-closed-line: #262626;
+  /* mono is already borderless-on-black in light mode's map-bg; dark mode
+     needs a lighter gray so the 1px gap stays visible against near-black
+     tiles instead of vanishing into the page background */
+  --map-bg: #2e2e2e;
+  --map-frame: 1px solid #2e2e2e;
 }

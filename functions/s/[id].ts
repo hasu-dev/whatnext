@@ -19,8 +19,23 @@ interface ConfEntry {
   year: number
   field: string
   deadline: string
+  nextCycleExpected?: string
   tz?: string
   location: string
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/** "2027-01" → "Jan 2027" */
+const expectedMonth = (ym: string) => {
+  const [y, m] = ym.split('-')
+  return `${MONTHS[Number(m) - 1] ?? m} ${y}`
+}
+
+/** "2027-01" → "2027-01-31" — cutoff math for estimated (YYYY-MM) deadlines */
+const endOfMonth = (ym: string) => {
+  const [y, m] = ym.split('-').map(Number)
+  return `${ym}-${new Date(Date.UTC(y, m, 0)).getUTCDate()}`
 }
 
 const esc = (s: string) =>
@@ -44,10 +59,30 @@ export const onRequestGet: PagesFunction<Env> = async (ctx) => {
   const conf = (conferences as ConfEntry[]).find((c) => c.id === id)
   if (!conf) return shell // unmatched id falls back to the plain SPA
 
-  const stamp = conf.deadline.includes('T') ? conf.deadline : `${conf.deadline}T23:59:59`
+  // a bare YYYY-MM deadline is an estimated month (mirrors src/lib/status.ts)
+  const estimated = conf.deadline.length === 7
+  const withDay = estimated ? endOfMonth(conf.deadline) : conf.deadline
+  const stamp = withDay.includes('T') ? withDay : `${withDay}T23:59:59`
   const msLeft = Date.parse(`${stamp}${tzOffset(conf.tz)}`) - Date.now()
-  const countdown = msLeft < 0 ? 'submissions closed' : `${Math.ceil(msLeft / 86_400_000)} days left`
-  const title = `${conf.name} ${conf.year} — deadline ${conf.deadline.slice(0, 10)}`
+  // mirrors src/lib/status.ts statusOf: a passed deadline with an announced
+  // future cycle month is TBA, not closed — keep previews consistent with
+  // the app UI and the OG image
+  const tba =
+    msLeft < 0 &&
+    !!conf.nextCycleExpected &&
+    conf.nextCycleExpected >= new Date().toISOString().slice(0, 7)
+  const countdown = tba
+    ? `next cycle expected ${expectedMonth(conf.nextCycleExpected!)}, date TBA`
+    : estimated
+      ? `deadline expected ~${expectedMonth(conf.deadline)}`
+      : msLeft < 0
+        ? 'submissions closed'
+        : `${Math.ceil(msLeft / 86_400_000)} days left`
+  const title = tba
+    ? `${conf.name} ${conf.year} — deadline TBA`
+    : estimated
+      ? `${conf.name} ${conf.year} — deadline ~${expectedMonth(conf.deadline)} (estimated)`
+      : `${conf.name} ${conf.year} — deadline ${conf.deadline.slice(0, 10)}`
   const description = `${conf.fullName} · ${conf.location} · ${countdown}. Track it on WHATNEXT.`
   const image = `${url.origin}/og/${conf.id}.png`
   const canonical = `${url.origin}/s/${conf.id}`

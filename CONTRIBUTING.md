@@ -33,7 +33,7 @@ when a PR is merged.
    | `year` | Edition year of the conference (not the deadline year) | `2027` |
    | `field` | Uppercase primary classification (single value) — reuse one if it fits | `NLP` |
    | `tags` | Optional, max 8, lowercase-hyphen slugs from [`data/tags.json`](data/tags.json) | `["nlp", "llm"]` |
-   | `deadline` | Paper cutoff, `YYYY-MM-DDTHH:MM:SS` in the entry's `tz`; use `T23:59:59` for end-of-day deadlines | `2026-12-15T23:59:59` |
+   | `deadline` | Paper cutoff, `YYYY-MM-DDTHH:MM:SS` in the entry's `tz` (use `T23:59:59` for end-of-day) — or a bare `YYYY-MM` estimated month, rendered everywhere with a `~` | `2026-12-15T23:59:59` |
    | `abstractDeadline` | Optional earlier abstract cutoff, same format | `2026-12-08T23:59:59` |
    | `deadlineNote` | Optional qualifier shown under the deadline | `Cycle 1` |
    | `nextCycleExpected` | Optional `YYYY-MM` of an announced next cycle whose date isn't published — renders the entry as TBA instead of CLOSED | `2027-02` |
@@ -57,6 +57,12 @@ when a PR is merged.
    *officially announced* without a date. Never guess a month; once the
    date is published, replace `deadline` and remove this field.
 
+   **Rolling an edition forward early?** A new `<confname>-<year>` entry
+   must never borrow last cycle's literal deadline — give the estimated
+   month only (`"deadline": "2027-01"`) and say what it's based on in
+   `deadlineNote`; every surface renders it as `~Jan '27`. Replace it with
+   the announced timestamp once the CFP is out.
+
    **Weight guide:** weight is only the *initial* tile size — live attention
    signals take over once the entry is in use. The in-app Add conf form maps
    tiers to Flagship 20 · Major 12 · Specialized 7 · Niche 3; hand-written
@@ -72,8 +78,10 @@ when a PR is merged.
    npm run validate:data
    ```
 
-4. **Open a pull request** with one conference per PR. Fill in the PR
-   template checklist; CI runs the same validator against your change.
+4. **Open a pull request with exactly one conference per PR** — don't
+   bundle multiple venues, and don't mix conference data with app/code
+   changes. Fill in the PR template checklist; CI runs the same
+   validator against your change.
 
 ## Updating an existing conference
 

@@ -20,12 +20,30 @@ function tzOffset(tz?: string): string {
 }
 
 /**
+ * A bare YYYY-MM deadline is an estimated month — used when an edition is
+ * listed before its CFP publishes the real date (see data/schema.json).
+ * Estimated deadlines render KDD-style as "~Jan '27" everywhere instead
+ * of a fake day-precise date.
+ */
+export function isEstimatedDeadline(deadline: string): boolean {
+  return deadline.length === 7
+}
+
+/** "2027-01" → "2027-01-31": last day of the month, for cutoff math. */
+function endOfMonthDay(ym: string): string {
+  const [y, m] = ym.split('-').map(Number)
+  return `${ym}-${new Date(Date.UTC(y, m, 0)).getUTCDate()}`
+}
+
+/**
  * Exact cutoff instant (ms since epoch). Deadlines are stored as full
  * local timestamps (YYYY-MM-DDTHH:MM:SS) interpreted in the entry's
- * timezone; a bare date (legacy) falls back to end of day.
+ * timezone; a bare date (legacy) falls back to end of day, and an
+ * estimated YYYY-MM to the end of that month.
  */
 export function deadlineCutoffMs(deadline: string, tz?: string): number {
-  const stamp = deadline.includes('T') ? deadline : `${deadline}T23:59:59`
+  const withDay = isEstimatedDeadline(deadline) ? endOfMonthDay(deadline) : deadline
+  const stamp = withDay.includes('T') ? withDay : `${withDay}T23:59:59`
   return Date.parse(`${stamp}${tzOffset(tz)}`)
 }
 
